@@ -30,14 +30,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    private Map<String, Marker> mMarkerMap = new HashMap<>();
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private DatabaseReference mDatabase;
     // Keys for storing activity state.
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
@@ -46,6 +47,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private DatabaseReference mDatabase;
     private GoogleMap mMap;
     private CameraPosition cameraPosition;
     // The entry point to the Places API.
@@ -56,7 +58,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
-
 
 
     @Override
@@ -77,19 +78,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        SetMarkers();
 
 // ...
 
@@ -98,30 +89,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+        setMarkers();
+
     }
 
-    private void SetMarkers() {
-        //         Add a marker in Sydney and move the camera
+    private void setMarkers() {
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onDataChange: something changed");
 
-                Log.d(TAG, "onDataChange: " + dataSnapshot.child("parkings").child("parking 1").child("Name").getValue());
+
+                Iterable<DataSnapshot> parkings = dataSnapshot.child("parkings").getChildren();
+                for (DataSnapshot parking :
+                        parkings) {
+                    DataSnapshot spots = parking.child("spots");
+                    long count = spots.getChildrenCount();
+                    long available = 0;
+                    for (DataSnapshot spot :
+                            spots.getChildren()) {
+                        if (Boolean.valueOf(spot.getValue().toString()) == true) {
+                            available++;
+
+                        }
+                    }
+                    String parkingName = parking.child("name").getValue().toString();
+                    Marker previousMarker = mMarkerMap.get(parkingName);
+                    if (previousMarker != null) {
+                        Log.d(TAG, "onDataChange: previous marker exists, update position:");
+                        previousMarker.setSnippet(available + "/" + count + " available");
+                        previousMarker.hideInfoWindow();
+                        previousMarker.showInfoWindow();
+                    } else {
+                        Log.d(TAG, "onDataChange: create new marker");
+                        LatLng parkinglocation = new LatLng(Double.valueOf(parking.child("lat").getValue().toString()), Double.valueOf(parking.child("long").getValue().toString()));
+                        MarkerOptions parkingMarker = new MarkerOptions().position(parkinglocation).title(parkingName).snippet(available + "/" + count + " available");
+//                    parkingMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.parking_icon));
+                        Marker marker = mMap.addMarker(parkingMarker);
+
+                        mMarkerMap.put(parkingName, marker);
+                    }
+
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                marker.getTitle();
-                return false;
             }
         });
     }
@@ -169,16 +183,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
                 mMap.getUiSettings().setMapToolbarEnabled(true);
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        marker.getTitle();
+                        marker.getSnippet();
+                        return false;
+                    }
+                });
             } else {
                 mMap.setMyLocationEnabled(false);
                 mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 lastKnownLocation = null;
                 getLocationPermission();
             }
-        } catch (SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
     }
+
     private void getDeviceLocation() {
         /*
          * Get the best and most recent location of the device, which may be null in rare
@@ -208,7 +231,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 });
             }
-        } catch (SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage(), e);
         }
     }
