@@ -16,14 +16,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -35,10 +33,10 @@ import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private final Map<String, Marker> mMarkerMap = new HashMap<>();
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private final Map<String, Marker> mMarkerMap = new HashMap<>();
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
@@ -108,8 +106,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (previousMarker != null) {
                         Log.d(TAG, "onDataChange: previous marker exists, update position:");
                         previousMarker.setSnippet(available + "/" + count + " available");
-                        previousMarker.hideInfoWindow();
-                        previousMarker.showInfoWindow();
+                        if (previousMarker.isInfoWindowShown()) {
+                            previousMarker.hideInfoWindow();
+                            previousMarker.showInfoWindow();
+                        }
                     } else {
                         Log.d(TAG, "onDataChange: create new marker");
                         LatLng parkinglocation = new LatLng(Double.valueOf(parking.child("lat").getValue().toString()), Double.valueOf(parking.child("long").getValue().toString()));
