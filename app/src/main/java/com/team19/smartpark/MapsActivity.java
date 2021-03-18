@@ -1,6 +1,6 @@
 package com.team19.smartpark;
 
-import android.annotation.SuppressLint;
+
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -51,10 +51,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
+    //ArrayList to hold all parking objects
     private ArrayList<Parking> parkings;
 
 
-    @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,41 +68,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Construct a FusedLocationProviderClient.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mDatabase = FirebaseDatabase.getInstance().getReference();
-//        parkings = new ArrayList<Parking>();
-//        Parking parking = new Parking();
-//        parking.name = "Saint Catherine Parking";
-//        parking.address = "1234 Blvd Saint Catherine";
-//        parking.lat = 45.500319;
-//        parking.lng = -73.572675;
-//        parking.status = false;
-//        HashMap<String,Boolean> spots = new HashMap<String, Boolean>();
-//        spots.put("L023", true);
-//        spots.put("L024", false);
-//        spots.put("L025", true);
-//        spots.put("L026", false);
-//        spots.put("L027", true);
-//        parking.spots = spots;
-//        parkings.add(parking);
-//        Parking parking1 = new Parking();
-//        parking1.name = "Concordia Parking";
-//        parking1.address = "5678 Guy Street";
-//        parking1.lat = 45.495717;
-//        parking1.lng = -73.579252;
-//        parking1.status = true;
-//        HashMap<String,Boolean> spots1 = new HashMap<String, Boolean>();
-//        spots1.put("G023", true);
-//        spots1.put("G024", false);
-//        spots1.put("G025", true);
-//        spots1.put("G026", false);
-//        spots1.put("G027", true);
-//        parking1.spots = spots1;
-//        parkings.add(parking1);
-//        parkings.add(parking1);
-//        Gson gson = new Gson();
-//        String json = gson.toJson(parkings);
-//        Log.d(TAG, json);
-//        mDatabase.push().setValue(parking);
-//        mDatabase.push().setValue(parking1);
 
 
     }
@@ -162,7 +127,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         // add the market to the hashmap to remember it next time (keep track of it)
                         mMarkerMap.put(parkingName, marker);
                     }
-
 
                 }
 
