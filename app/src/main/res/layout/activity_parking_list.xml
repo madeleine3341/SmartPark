@@ -8,13 +8,14 @@
 
     <ListView
         android:id="@+id/ParkingList"
-        android:layout_width="273dp"
-        android:layout_height="437dp"
+        android:layout_width="173dp"
+        android:layout_height="140dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.115"
+        app:layout_constraintHorizontal_bias="0.163"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.2" />
+        app:layout_constraintVertical_bias="0.115"></ListView>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

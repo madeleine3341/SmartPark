@@ -2,6 +2,7 @@ package com.team19.smartpark;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParkingListActivity extends AppCompatActivity {
-
+    private RecyclerView mRecyclerView;
     protected ListView parkingList;
     private DatabaseReference PNDatabase;
     List <String> parkings = null;
@@ -38,9 +39,8 @@ public class ParkingListActivity extends AppCompatActivity {
         parkingList = findViewById(R.id.ParkingList);
         PNDatabase = FirebaseDatabase.getInstance().getReference(); //route
 
+        readParking();
 
-
-        loadListView();
         parkingList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -51,23 +51,37 @@ public class ParkingListActivity extends AppCompatActivity {
     }
 
 
-    protected void loadListView() {
+    public void readParking(){
+        ArrayList<String> arrayList = new ArrayList<>();
+        List<String>keys=new ArrayList<>();
 
-            ArrayList<String> arrayList = new ArrayList<>();
-
-            //static for now
-            arrayList.add("parking1");
-             arrayList.add("parking2");
+        PNDatabase.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
 
+                //datasnap stores key and value of a node
+                for(DataSnapshot keyNode: dataSnapshot.getChildren()){
+                    keys.add(keyNode.getKey());// save the key in the keylist
+                    Parking parking = keyNode.getValue(Parking.class);//intialize the parking using its key
+//                    parkings.add(parking.getName());//add parking to the parking list
+                    arrayList.add(parking.getName());
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
         ArrayAdapter arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, arrayList);
         parkingList.setAdapter(arrayAdapter);
-
     }
 
     private void goToParkingSpotsActivity() {
-        Intent intent = new Intent(this, ParkingSpotsActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(this, ParkingSpotsActivity.class);
+        //startActivity(intent);
     }
 
 }
