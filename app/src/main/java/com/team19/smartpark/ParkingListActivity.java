@@ -15,14 +15,19 @@ import android.widget.ListView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class ParkingListActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
@@ -39,7 +44,9 @@ public class ParkingListActivity extends AppCompatActivity {
         parkingList = findViewById(R.id.ParkingList);
         PNDatabase = FirebaseDatabase.getInstance().getReference(); //route
 
-        readParking();
+           readParking();
+
+
 
         parkingList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -49,34 +56,44 @@ public class ParkingListActivity extends AppCompatActivity {
         });
 
     }
+   /* public void readParkings() {
+        ArrayList<String> arrayList = new ArrayList<>();
+        FirebaseHelper helper = new FirebaseHelper();//
+
+        //pass PNDatabase to helper
+
+        int size=helper.getParkingLots().size();
+
+        for(int i = 0; i <size; i++) {
+            arrayList.add(helper.getParkingLots().get(i).getName());// add parkings names from parkings array to arraylist array
+        }
+        ArrayAdapter arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, arrayList);
+        parkingList.setAdapter(arrayAdapter);
+    }*/
 
 
     public void readParking(){
-        ArrayList<String> arrayList = new ArrayList<>();
-        List<String>keys=new ArrayList<>();
 
         PNDatabase.addValueEventListener(new ValueEventListener() {
+            ArrayList<String> arrayList = new ArrayList<>();
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-
+                TreeMap <String,Parking> keyParking = new TreeMap<>();
                 //datasnap stores key and value of a node
                 for(DataSnapshot keyNode: dataSnapshot.getChildren()){
-                    keys.add(keyNode.getKey());// save the key in the keylist
-                    Parking parking = keyNode.getValue(Parking.class);//intialize the parking using its key
-//                    parkings.add(parking.getName());//add parking to the parking list
-                    arrayList.add(parking.getName());
-
+                    keyParking.put(keyNode.getKey(),keyNode.getValue(Parking.class));
                 }
+                for (Map.Entry<String, Parking> parking :keyParking.entrySet()) {
+                    arrayList.add(parking.getValue().getName());
+                }
+                ArrayAdapter arrayAdapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, arrayList);
+                parkingList.setAdapter(arrayAdapter);
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
             }
         });
-        ArrayAdapter arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, arrayList);
-        parkingList.setAdapter(arrayAdapter);
+
     }
 
     private void goToParkingSpotsActivity() {
