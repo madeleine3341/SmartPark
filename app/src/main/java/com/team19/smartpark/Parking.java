@@ -1,19 +1,19 @@
 package com.team19.smartpark;
 
-import java.util.LinkedHashMap;
+import java.util.TreeMap;
 
 public class Parking {
     public String address;
     public double lat;
     public double lng;
     public String name;
-    public LinkedHashMap<String, Boolean> spots;
+    public TreeMap<String, Boolean> spots;
     public boolean status;
 
     public Parking() {
     }
 
-    public Parking(String address, double lat, double lng, String name, LinkedHashMap<String, Boolean> spots, boolean status) {
+    public Parking(String address, double lat, double lng, String name, TreeMap<String, Boolean> spots, boolean status) {
         this.address = address;
         this.lat = lat;
         this.lng = lng;
@@ -66,11 +66,11 @@ public class Parking {
         this.name = name;
     }
 
-    public LinkedHashMap<String, Boolean> getSpots() {
+    public TreeMap<String, Boolean> getSpots() {
         return spots;
     }
 
-    public void setSpots(LinkedHashMap<String, Boolean> spots) {
+    public void setSpots(TreeMap<String, Boolean> spots) {
         this.spots = spots;
     }
 

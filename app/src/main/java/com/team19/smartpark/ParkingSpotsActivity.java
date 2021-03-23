@@ -36,8 +36,8 @@ public class ParkingSpotsActivity extends AppCompatActivity {
         mDatabase.orderByKey().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                TreeMap<String, Boolean> spotss = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
-                LinkedHashMap<String, Boolean> spots = new LinkedHashMap<String, Boolean>(spotss);
+                TreeMap<String, Boolean> spots = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
+//                LinkedHashMap<String, Boolean> spots = new LinkedHashMap<String, Boolean>(spotss);
                 loadList(spots);
             }
 
@@ -49,7 +49,7 @@ public class ParkingSpotsActivity extends AppCompatActivity {
 
     }
 
-    private void loadList(LinkedHashMap<String, Boolean> spots) {
+    private void loadList(TreeMap<String, Boolean> spots) {
         adapter = new ParkingSpotAdapter(this, spots);
         parkingGrid.setAdapter(adapter);
     }

@@ -16,12 +16,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class ParkingSpotAdapter extends RecyclerView.Adapter<ParkingSpotAdapter.ViewHolder> {
     ArrayList<Map.Entry<String, Boolean>> spots;
     LayoutInflater inflater;
 
-    public ParkingSpotAdapter(Context ctx, LinkedHashMap<String, Boolean> spots) {
+    public ParkingSpotAdapter(Context ctx, TreeMap<String, Boolean> spots) {
         this.spots = new ArrayList<Map.Entry<String, Boolean>>(spots.entrySet());
         this.inflater = LayoutInflater.from(ctx);
     }
