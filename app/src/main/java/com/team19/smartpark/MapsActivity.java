@@ -1,5 +1,6 @@
 package com.team19.smartpark;
 
+
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -28,6 +29,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +51,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // The geographical location where the device is currently located. That is, the last-known
     // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
+    //ArrayList to hold all parking objects
+    private ArrayList<Parking> parkings;
 
 
     @Override
@@ -63,6 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Construct a FusedLocationProviderClient.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
 
     }
 
@@ -85,42 +91,46 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange: something changed");
 
-
-                Iterable<DataSnapshot> parkings = dataSnapshot.child("parkings").getChildren();
+                Iterable<DataSnapshot> parkings = dataSnapshot.getChildren();
+                //array list to hold all parking lots
+                ArrayList<Parking> parkingsList = new ArrayList<Parking>();
                 for (DataSnapshot parking :
                         parkings) {
-                    DataSnapshot spots = parking.child("spots");
-                    long count = spots.getChildrenCount();
-                    long available = 0;
-                    for (DataSnapshot spot :
-                            spots.getChildren()) {
-                        if (Boolean.valueOf(spot.getValue().toString()) == true) {
-                            available++;
-
-                        }
-                    }
-                    String parkingName = parking.child("name").getValue().toString();
+                    //put all parking lots in the array list
+                    parkingsList.add(parking.getValue(Parking.class));
+                }
+                //for each parking create a marker and populate it with its stats, if marker already created, just updated
+                for (Parking parking :
+                        parkingsList) {
+                    int count = parking.spots.size();
+                    int available = Collections.frequency(parking.spots.values(), true);
+                    String parkingName = parking.name;
                     Marker previousMarker = mMarkerMap.get(parkingName);
+                    // if previous marker already exists just update its availability
                     if (previousMarker != null) {
-                        Log.d(TAG, "onDataChange: previous marker exists, update position:");
+                        Log.d(TAG, "onDataChange: previous marker exists, update availability");
                         previousMarker.setSnippet(available + "/" + count + " available");
                         if (previousMarker.isInfoWindowShown()) {
                             previousMarker.hideInfoWindow();
                             previousMarker.showInfoWindow();
                         }
-                    } else {
+                    }
+                    // else its a new marker to be added (which means a new parking lot has been added)
+                    else {
                         Log.d(TAG, "onDataChange: create new marker");
-                        LatLng parkinglocation = new LatLng(Double.valueOf(parking.child("lat").getValue().toString()), Double.valueOf(parking.child("long").getValue().toString()));
-                        MarkerOptions parkingMarker = new MarkerOptions().position(parkinglocation).title(parkingName).snippet(available + "/" + count + " available");
+                        LatLng parkingLocation = new LatLng(parking.lat, parking.lng);
+                        MarkerOptions parkingMarker = new MarkerOptions().position(parkingLocation).title(parkingName).snippet(available + "/" + count + " available");
 //                    parkingMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.parking_icon));
+                        //put the new marker on the map to display it
                         Marker marker = mMap.addMarker(parkingMarker);
-
+                        // add the market to the hashmap to remember it next time (keep track of it)
                         mMarkerMap.put(parkingName, marker);
                     }
 
                 }
+
+
             }
 
             @Override
