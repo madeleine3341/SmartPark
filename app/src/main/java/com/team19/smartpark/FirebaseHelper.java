@@ -15,6 +15,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FirebaseHelper {
@@ -39,7 +40,7 @@ public class FirebaseHelper {
 
     }
 
-    public static HashMap<String, Boolean> getParkingSpots(Parking parking) {
+    public static LinkedHashMap<String, Boolean> getParkingSpots(Parking parking) {
         return parking.spots;
     }
 
@@ -49,7 +50,7 @@ public class FirebaseHelper {
     }
 
     public static void addParkingSpot(Parking parking, String id) {
-        Map<String, Object> spot = new HashMap<String, Object>();
+        Map<String, Object> spot = new LinkedHashMap<String, Object>();
         spot.put(id, true);
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         mDatabase.orderByChild("name").equalTo(parking.name).addChildEventListener(new ChildEventListener() {

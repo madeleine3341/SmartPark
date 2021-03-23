@@ -29,9 +29,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -52,7 +52,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
     //ArrayList to hold all parking objects
-    private ArrayList<Parking> parkings;
+    private LinkedHashMap<String, Parking> parkings;
 
 
     @Override
@@ -94,19 +94,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 Iterable<DataSnapshot> parkings = dataSnapshot.getChildren();
                 //array list to hold all parking lots
-                ArrayList<Parking> parkingsList = new ArrayList<Parking>();
+                LinkedHashMap<String, Parking> parkingsList = new LinkedHashMap<String, Parking>();
                 for (DataSnapshot parking :
                         parkings) {
+                    parking.getKey();
                     //put all parking lots in the array list
-                    parkingsList.add(parking.getValue(Parking.class));
+                    parkingsList.put(parking.getKey(), parking.getValue(Parking.class));
                 }
                 //for each parking create a marker and populate it with its stats, if marker already created, just updated
-                for (Parking parking :
-                        parkingsList) {
+                for (Map.Entry<String, Parking> parkingSet :
+                        parkingsList.entrySet()) {
+                    Parking parking = parkingSet.getValue();
                     int count = parking.spots.size();
                     int available = Collections.frequency(parking.spots.values(), true);
-                    String parkingName = parking.name;
-                    Marker previousMarker = mMarkerMap.get(parkingName);
+                    String parkingId = parkingSet.getKey();
+                    Marker previousMarker = mMarkerMap.get(parkingId);
                     // if previous marker already exists just update its availability
                     if (previousMarker != null) {
                         Log.d(TAG, "onDataChange: previous marker exists, update availability");
@@ -120,12 +122,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     else {
                         Log.d(TAG, "onDataChange: create new marker");
                         LatLng parkingLocation = new LatLng(parking.lat, parking.lng);
-                        MarkerOptions parkingMarker = new MarkerOptions().position(parkingLocation).title(parkingName).snippet(available + "/" + count + " available");
+                        MarkerOptions parkingMarker = new MarkerOptions().position(parkingLocation).title(parking.name).snippet(available + "/" + count + " available");
 //                    parkingMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.parking_icon));
                         //put the new marker on the map to display it
                         Marker marker = mMap.addMarker(parkingMarker);
                         // add the market to the hashmap to remember it next time (keep track of it)
-                        mMarkerMap.put(parkingName, marker);
+                        mMarkerMap.put(parking.name, marker);
                     }
 
                 }
