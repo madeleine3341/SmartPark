@@ -56,21 +56,6 @@ public class ParkingListActivity extends AppCompatActivity {
         });
 
     }
-   /* public void readParkings() {
-        ArrayList<String> arrayList = new ArrayList<>();
-        FirebaseHelper helper = new FirebaseHelper();//
-
-        //pass PNDatabase to helper
-
-        int size=helper.getParkingLots().size();
-
-        for(int i = 0; i <size; i++) {
-            arrayList.add(helper.getParkingLots().get(i).getName());// add parkings names from parkings array to arraylist array
-        }
-        ArrayAdapter arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, arrayList);
-        parkingList.setAdapter(arrayAdapter);
-    }*/
-
 
     public void readParking(){
 
