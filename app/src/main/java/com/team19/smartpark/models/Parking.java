@@ -1,4 +1,4 @@
-package com.team19.smartpark;
+package com.team19.smartpark.models;
 
 import java.util.TreeMap;
 

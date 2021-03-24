@@ -1,4 +1,4 @@
-package com.team19.smartpark;
+package com.team19.smartpark.models;
 
 import android.annotation.SuppressLint;
 
@@ -12,9 +12,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.team19.smartpark.models.Parking;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Map;
 

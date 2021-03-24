@@ -49,6 +49,10 @@ public class LinkSensorActivity extends AppCompatActivity {
                     WifiManager.EXTRA_RESULTS_UPDATED, false);
             Log.d(TAG, "onReceive: " + success);
             List<ScanResult> results = wifiManager.getScanResults();
+            for (ScanResult result :
+                    results) {
+                Log.d(TAG, "onReceive: " + result.SSID);
+            }
             espwifi = results.stream()
                     .filter(scanResult -> scanResult.SSID.startsWith("ESP")).findAny().orElse(null);
             Log.d(TAG, "onReceive: " + espwifi);
@@ -155,6 +159,11 @@ public class LinkSensorActivity extends AppCompatActivity {
                             configButton.setVisibility(View.GONE);
                         });
                         cm.unregisterNetworkCallback(networkCallback);
+                    } else if (urlConnection.getResponseCode() == 400) {
+                        runOnUiThread(() -> {
+                            instructionText.setText("You entered invalid credentials");
+                        });
+//                        cm.unregisterNetworkCallback(networkCallback);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
