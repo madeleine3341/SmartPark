@@ -3,6 +3,7 @@ package com.team19.smartpark;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -45,6 +46,8 @@ public class ParkingListActivity extends AppCompatActivity {
         PNDatabase = FirebaseDatabase.getInstance().getReference(); //route
 
         ly = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        plist.addItemDecoration(new DividerItemDecoration(plist.getContext(), DividerItemDecoration.VERTICAL));
+
         plist.setLayoutManager(ly);
 
         readParkings();
