@@ -1,5 +1,6 @@
 package com.team19.smartpark.adapters;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.team19.smartpark.LinkSensorActivity;
 import com.team19.smartpark.R;
 
 public class BottomSheetDialog extends BottomSheetDialogFragment {
@@ -26,6 +28,10 @@ public class BottomSheetDialog extends BottomSheetDialogFragment {
                 String parent = getArguments().getString("parent");
                 Log.d("TAG", "onClick: " + parent + "/spots/" + spot);
                 dismiss();
+                Intent intent = new Intent(v.getContext(), LinkSensorActivity.class);
+                intent.putExtra("parkingPath", parent + "/spots/" + spot);
+                startActivity(intent);
+
             }
         });
         return v;

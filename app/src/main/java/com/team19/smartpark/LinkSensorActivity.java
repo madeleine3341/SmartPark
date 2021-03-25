@@ -67,11 +67,16 @@ public class LinkSensorActivity extends AppCompatActivity {
         }
 
     };
+    private String parkingPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_link_sensor);
+
+        Intent intent = getIntent();
+        parkingPath = intent.getStringExtra("parkingPath");
+        Log.d(TAG, "onCreate: " + parkingPath);
 
         spinner = findViewById(R.id.progressBar);
 
@@ -87,7 +92,7 @@ public class LinkSensorActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 instructionText.setText("Sending Configuration to sensor");
-                sendConfig(espwifi);
+                sendConfig(espwifi, parkingPath, ssidText.getText().toString(), passwordText.getText().toString());
             }
         });
 
@@ -104,7 +109,7 @@ public class LinkSensorActivity extends AppCompatActivity {
         Log.d(TAG, "scanWifi: scanning wifi");
     }
 
-    private void sendConfig(ScanResult esp32) {
+    private void sendConfig(ScanResult esp32, String parkingPath, String pSSID, String pPassword) {
         boolean done = false;
         wifiManager = (WifiManager)
                 getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -124,9 +129,6 @@ public class LinkSensorActivity extends AppCompatActivity {
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
-                //Use this network object to Send request.
-                //eg - Using OkHttp library to create a service request
-                //Service is an OkHttp interface where we define docs. Please read OkHttp docs
                 HttpURLConnection urlConnection = null;
                 try {
                     Log.d(TAG, "onAvailable: sending config");
@@ -137,10 +139,11 @@ public class LinkSensorActivity extends AppCompatActivity {
                     urlConnection.setDoOutput(true);
                     JSONObject jsonInput = new JSONObject();
                     jsonInput.put("config", true);
-                    jsonInput.put("ssid", "dlink");
-                    jsonInput.put("password", "12345678");
-                    jsonInput.put("path", "/users/parkings/id/spots/L023");
+                    jsonInput.put("ssid", pSSID);
+                    jsonInput.put("password", pPassword);
+                    jsonInput.put("path", parkingPath);
                     String jsonString = jsonInput.toString();
+                    Log.d(TAG, "onAvailable: " + jsonString);
                     urlConnection.connect();
                     try (OutputStream os = urlConnection.getOutputStream()) {
                         Log.d(TAG, "onAvailable: sending");
