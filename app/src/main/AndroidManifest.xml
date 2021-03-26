@@ -21,12 +21,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartPark"
         android:usesCleartextTraffic="true">
-        <activity
-            android:name=".ParkingSpotsActivity"
-            android:exported="true"></activity>
-        <activity
-            android:name=".LinkSensorActivity"
-            android:exported="true" />
         <activity android:name=".MainActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
