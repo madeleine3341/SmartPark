@@ -15,6 +15,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.team19.smartpark.models.Parking;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ public class FirebaseHelper {
 
     }
 
-    public static TreeMap<String, Boolean> getParkingSpots(Parking parking) {
+    public static HashMap<String, Boolean> getParkingSpots(Parking parking) {
         return parking.spots;
     }
 

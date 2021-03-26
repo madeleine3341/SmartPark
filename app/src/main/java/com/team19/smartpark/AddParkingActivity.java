@@ -12,6 +12,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.team19.smartpark.models.FirebaseHelper;
 import com.team19.smartpark.models.Parking;
 
+import java.util.HashMap;
 import java.util.TreeMap;
 
 public class AddParkingActivity extends AppCompatActivity {
@@ -48,7 +49,7 @@ public class AddParkingActivity extends AppCompatActivity {
                 strSpots = strSpots.replace(" ", "");
                 String[] spots = strSpots.split(",");
 
-                TreeMap<String, Boolean> hashspot = new TreeMap<>();
+                HashMap<String, Boolean> hashspot = new HashMap<>();
                 for (String spot :
                         spots) {
                     hashspot.put(spot, true);
@@ -74,6 +75,7 @@ public class AddParkingActivity extends AppCompatActivity {
                     parking.spots = hashspot;
                     FirebaseHelper.addParkingLots(parking);
                     Toast.makeText(getApplicationContext(), "Parking added successfully", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             }
         });

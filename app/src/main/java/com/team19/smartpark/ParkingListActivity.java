@@ -7,17 +7,21 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.team19.smartpark.models.Parking;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,14 +38,23 @@ public class ParkingListActivity extends AppCompatActivity {
     ParkingListAdapter adapter;
     private RecyclerView plist;
     LinearLayoutManager ly;
+    private FloatingActionButton addParkingFAB;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parking_list);
+        addParkingFAB = findViewById(R.id.addParkingfab);
+        addParkingFAB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), AddParkingActivity.class);
+                startActivity(intent);
+            }
+        });
 
-        plist = (RecyclerView) findViewById(R.id.Parking_RecyclerView);
+        plist = findViewById(R.id.Parking_RecyclerView);
 
         PNDatabase = FirebaseDatabase.getInstance().getReference(); //route
 
@@ -62,7 +75,8 @@ public class ParkingListActivity extends AppCompatActivity {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<String>  name=new ArrayList<>();
+                ArrayList<String> id = new ArrayList<>();
+                ArrayList<String> name = new ArrayList<>();
                 ArrayList<HashMap<String, Boolean>> spots = new ArrayList<>();
 
                 TreeMap<String, Parking> keyParking = new TreeMap<>();
@@ -70,13 +84,8 @@ public class ParkingListActivity extends AppCompatActivity {
                 for (DataSnapshot keyNode : dataSnapshot.getChildren()) {
                     keyParking.put(keyNode.getKey(), keyNode.getValue(Parking.class));
                 }
-                //for each node get name and
-                for (Map.Entry<String, Parking> parking : keyParking.entrySet()) {
-                    name.add(parking.getValue().getName());
-                    spots.add(parking.getValue().getSpots());//get one spot
+                loadlist(keyParking);
 
-                }
-                loadlist(name, spots);
             }
 
             @Override
@@ -86,9 +95,8 @@ public class ParkingListActivity extends AppCompatActivity {
 
     }
 
-
-   private void loadlist(ArrayList<String> parkingname, ArrayList<HashMap<String, Boolean>> spots) {
-    adapter = new ParkingListAdapter(parkingname, this,spots);
+    private void loadlist(TreeMap<String, Parking> keyParking) {
+        adapter = new ParkingListAdapter(keyParking, this);
         plist.setAdapter(adapter);
     }
 

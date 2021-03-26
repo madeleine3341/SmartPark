@@ -1,5 +1,6 @@
 package com.team19.smartpark;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -28,7 +29,8 @@ public class ParkingSpotsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        parkingPath = "-MWTyaEntGmeUhbQfV8N";
+        Intent intent = getIntent();
+        parkingPath = intent.getStringExtra("parkingId");
         setContentView(R.layout.activity_parking_spots);
         parkingGrid = findViewById(R.id.parkingGrid);
         gridLayoutManager = new GridLayoutManager(this, 4, GridLayoutManager.VERTICAL, false);

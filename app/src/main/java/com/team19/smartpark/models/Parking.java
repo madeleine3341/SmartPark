@@ -1,19 +1,19 @@
 package com.team19.smartpark.models;
 
-import java.util.TreeMap;
+import java.util.HashMap;
 
 public class Parking {
     public String address;
     public double lat;
     public double lng;
     public String name;
-    public TreeMap<String, Boolean> spots;
+    public HashMap<String, Boolean> spots;
     public boolean status;
 
     public Parking() {
     }
 
-    public Parking(String address, double lat, double lng, String name, TreeMap<String, Boolean> spots, boolean status) {
+    public Parking(String address, double lat, double lng, String name, HashMap<String, Boolean> spots, boolean status) {
         this.address = address;
         this.lat = lat;
         this.lng = lng;
@@ -66,11 +66,11 @@ public class Parking {
         this.name = name;
     }
 
-    public TreeMap<String, Boolean> getSpots() {
+    public HashMap<String, Boolean> getSpots() {
         return spots;
     }
 
-    public void setSpots(TreeMap<String, Boolean> spots) {
+    public void setSpots(HashMap<String, Boolean> spots) {
         this.spots = spots;
     }
 
