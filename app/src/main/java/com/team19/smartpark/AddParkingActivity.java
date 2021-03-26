@@ -59,14 +59,14 @@ public class AddParkingActivity extends AppCompatActivity {
                 double lat = 0.0;
                 double lng = 0.0;
                 try {
-                    lat = Double.valueOf(latTextView.getText().toString());
-                    lng = Double.valueOf(lngTextView.getText().toString());
+                    lat = Double.parseDouble(latTextView.getText().toString());
+                    lng = Double.parseDouble(lngTextView.getText().toString());
 
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException ignored) {
 
                 }
 
-                if (name != null && address != null && lat != 0.0 && lng != 0.0) {
+                if (!name.isEmpty() && !address.isEmpty() && lat != 0.0 && lng != 0.0) {
                     Parking parking = new Parking();
                     parking.address = address;
                     parking.lat = lat;

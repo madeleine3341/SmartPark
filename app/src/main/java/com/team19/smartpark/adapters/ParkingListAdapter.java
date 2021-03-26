@@ -1,4 +1,4 @@
-package com.team19.smartpark;
+package com.team19.smartpark.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.team19.smartpark.ParkingSpotsActivity;
+import com.team19.smartpark.R;
 import com.team19.smartpark.models.Parking;
 
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.ViewHolder> {
+public class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.ViewHolder> {
     private final ArrayList<String> mParkingListName = new ArrayList<>();
     private final TreeMap<String, Parking> mKeys;
     LayoutInflater inflater;
