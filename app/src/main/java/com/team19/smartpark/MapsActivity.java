@@ -3,10 +3,17 @@ package com.team19.smartpark;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -33,9 +40,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.team19.smartpark.models.Parking;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -49,6 +58,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
     private DatabaseReference mDatabase;
     private GoogleMap mMap;
+    private SearchView searchView;
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
     private boolean locationPermissionGranted;
@@ -81,6 +91,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivity(intent);
             }
         });
+
+        searchView = findViewById(R.id.search_bar);
+        int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+        TextView textView = searchView.findViewById(id);
+        textView.setTextColor(Color.BLACK);
+        searchView.onWindowFocusChanged(false);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                String location = searchView.getQuery().toString();
+                List<Address> addressList = null;
+                if (location != null || !location.equals("")) {
+                    Geocoder geocoder = new Geocoder(MapsActivity.this);
+                    try {
+                        addressList = geocoder.getFromLocationName(location, 1);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Address address = null;
+                    try {
+                        address = addressList.get(0);
+
+                    } catch (IndexOutOfBoundsException ignore) {
+
+                    }
+                    if (address != null) {
+                        LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Adress not found", Toast.LENGTH_SHORT).show();
+                    }
+                    searchView.clearFocus();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
     }
 
     @Override
