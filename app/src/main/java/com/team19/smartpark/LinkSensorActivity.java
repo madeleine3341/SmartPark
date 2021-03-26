@@ -109,6 +109,15 @@ public class LinkSensorActivity extends AppCompatActivity {
         Log.d(TAG, "scanWifi: scanning wifi");
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (cm != null) {
+            cm.unregisterNetworkCallback(networkCallback);
+        }
+        Log.d(TAG, "onDestroy: network session ended");
+    }
+
     private void sendConfig(ScanResult esp32, String parkingPath, String pSSID, String pPassword) {
         boolean done = false;
         wifiManager = (WifiManager)
@@ -116,7 +125,7 @@ public class LinkSensorActivity extends AppCompatActivity {
         Log.d(TAG, "scanSuccess: found potential esp");
         WifiNetworkSpecifier.Builder builder = new WifiNetworkSpecifier.Builder();
         builder.setSsid(esp32.SSID);
-        builder.setWpa2Passphrase("12345678");
+        builder.setWpa2Passphrase("welcome123");
 
         WifiNetworkSpecifier wifiNetworkSpecifier = builder.build();
 
@@ -142,7 +151,7 @@ public class LinkSensorActivity extends AppCompatActivity {
                     jsonInput.put("ssid", pSSID);
                     jsonInput.put("password", pPassword);
                     jsonInput.put("path", parkingPath);
-                    String jsonString = jsonInput.toString();
+                    String jsonString = jsonInput.toString().replace("\\/", "/");
                     Log.d(TAG, "onAvailable: " + jsonString);
                     urlConnection.connect();
                     try (OutputStream os = urlConnection.getOutputStream()) {

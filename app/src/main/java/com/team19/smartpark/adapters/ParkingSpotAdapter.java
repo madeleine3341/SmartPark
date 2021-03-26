@@ -8,12 +8,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.team19.smartpark.ParkingSpotsActivity;
 import com.team19.smartpark.R;
 
@@ -25,11 +30,13 @@ public class ParkingSpotAdapter extends RecyclerView.Adapter<ParkingSpotAdapter.
     ArrayList<Map.Entry<String, Boolean>> spots;
     LayoutInflater inflater;
     FragmentManager fragmentManager;
+    Context context;
 
     public ParkingSpotAdapter(Context ctx, TreeMap<String, Boolean> spots, FragmentManager fragmentManager) {
         this.spots = new ArrayList<Map.Entry<String, Boolean>>(spots.entrySet());
         this.inflater = LayoutInflater.from(ctx);
         this.fragmentManager = fragmentManager;
+        this.context = ctx;
     }
 
     @NonNull
@@ -60,6 +67,20 @@ public class ParkingSpotAdapter extends RecyclerView.Adapter<ParkingSpotAdapter.
                 bundle.putString("parent", ParkingSpotsActivity.parkingPath);
                 bottomSheet.setArguments(bundle);
                 bottomSheet.show(fragmentManager, "bottomsheet");
+            }
+        });
+        holder.cardView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                DatabaseReference mSpot = FirebaseDatabase.getInstance().getReference("/" + ParkingSpotsActivity.parkingPath + "/spots");
+                mSpot.child(spot.getKey()).removeValue(new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                        Toast.makeText(context, "Spot " + spot.getKey() + " deleted", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                return false;
             }
         });
 

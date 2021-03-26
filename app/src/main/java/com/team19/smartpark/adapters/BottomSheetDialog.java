@@ -26,10 +26,10 @@ public class BottomSheetDialog extends BottomSheetDialogFragment {
             public void onClick(View v) {
                 String spot = getArguments().getString("spot");
                 String parent = getArguments().getString("parent");
-                Log.d("TAG", "onClick: " + parent + "/spots/" + spot);
+                Log.d("TAG", "onClick: " + "/" + parent + "/spots/" + spot);
                 dismiss();
                 Intent intent = new Intent(v.getContext(), LinkSensorActivity.class);
-                intent.putExtra("parkingPath", parent + "/spots/" + spot);
+                intent.putExtra("parkingPath", "/" + parent + "/spots/" + spot);
                 startActivity(intent);
 
             }
