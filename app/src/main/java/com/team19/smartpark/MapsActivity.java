@@ -10,7 +10,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -91,11 +90,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivity(intent);
             }
         });
+        try {
+            searchView = findViewById(R.id.search_bar);
+            int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            TextView textView = searchView.findViewById(id);
+            textView.setTextColor(Color.BLACK);
 
-        searchView = findViewById(R.id.search_bar);
-        int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-        TextView textView = searchView.findViewById(id);
-        textView.setTextColor(Color.BLACK);
+        } catch (NullPointerException ignore) {
+
+        }
         searchView.onWindowFocusChanged(false);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
