@@ -2,6 +2,7 @@ package com.team19.smartpark;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -58,11 +59,19 @@ public class ParkingSpotsActivity extends AppCompatActivity {
         parkingGrid.setAdapter(adapter);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.action_bar_items, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_addParkingSpot) {
             /// User chose the "Settings" item, show the app settings UI...
+            AddParkingSpotsFragment dialog = new AddParkingSpotsFragment();
+            dialog.show(getSupportFragmentManager(), "AddParkingSpotFragment");
             return true;
         }// If we got here, the user's action was not recognized.
         // Invoke the superclass to handle it.

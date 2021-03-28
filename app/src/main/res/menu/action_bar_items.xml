@@ -6,7 +6,7 @@
         android:id="@+id/action_addParkingSpot"
         android:icon="@android:drawable/ic_input_add"
         android:title="Add parking spot"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 
 
 </menu>
