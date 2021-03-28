@@ -2,6 +2,7 @@ package com.team19.smartpark;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -55,5 +56,16 @@ public class ParkingSpotsActivity extends AppCompatActivity {
     private void loadList(TreeMap<String, Boolean> spots, FragmentManager supportFragmentManager) {
         adapter = new ParkingSpotAdapter(this, spots, supportFragmentManager);
         parkingGrid.setAdapter(adapter);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_addParkingSpot) {
+            /// User chose the "Settings" item, show the app settings UI...
+            return true;
+        }// If we got here, the user's action was not recognized.
+        // Invoke the superclass to handle it.
+        return super.onOptionsItemSelected(item);
     }
 }
