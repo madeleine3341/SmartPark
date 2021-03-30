@@ -151,6 +151,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         getDeviceLocation();
         setMarkers();
 
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+
+            @Override
+            public void onInfoWindowClick(Marker arg0) {
+                Intent intent = new Intent(getApplicationContext(), ParkingInfoActivity.class);
+                String reference = arg0.getTitle();
+                intent.putExtra("reference", reference);
+
+                // Starting the  Activity
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void setMarkers() {
