@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -18,7 +19,6 @@
             android:layout_height="match_parent"
             tools:context=".MapsActivity" />
 
-
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/floatingActionButton"
             android:layout_width="100dp"
@@ -32,6 +32,58 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/search_bar"
             app:srcCompat="@drawable/common_full_open_on_phone" />
+
+        <TextView
+            android:id="@+id/sortTextView"
+            android:layout_width="86dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="19dp"
+            android:layout_marginTop="73dp"
+            android:layout_marginEnd="306dp"
+            android:layout_marginBottom="629dp"
+            android:text="Sort By: "
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/nearbyButton"
+            android:layout_width="205dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="104dp"
+            android:layout_marginTop="69dp"
+            android:layout_marginEnd="102dp"
+            android:layout_marginBottom="627dp"
+            android:background="@drawable/custom_background"
+            android:backgroundTint="@color/white"
+            android:text="See nearby parking lots"
+            android:textSize="10sp"
+            tools:visibility="gone" />
+
+        <Button
+            android:id="@+id/clearButton"
+            android:layout_width="54dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="22dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginEnd="43dp"
+            android:layout_marginBottom="627dp"
+            android:layout_toEndOf="@+id/sortPriceButton"
+            android:background="@drawable/custom_background"
+            android:backgroundTint="@color/white"
+            android:text="X"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
         <SearchView
             android:id="@+id/search_bar"
@@ -49,12 +101,44 @@
             android:queryBackground="@android:color/transparent"
             android:queryHint="Search......"
             android:searchIcon="@drawable/ic_baseline_edit_location_24"
-            android:visibility="visible"
-            tools:visibility="visible">
+            android:visibility="visible"></SearchView>
 
+        <ToggleButton
+            android:id="@+id/sortDistanceButton"
+            android:layout_width="78dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="96dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginBottom="628dp"
+            android:background="@drawable/custom_background"
+            android:backgroundTint="@color/white"
+            android:textOff="Distance"
+            android:textOn="Distance"
+            android:textSize="8sp"
+            android:textStyle="bold" />
 
-        </SearchView>
-
+        <ToggleButton
+            android:id="@+id/sortPriceButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="11dp"
+            android:layout_marginTop="70dp"
+            android:layout_marginBottom="628dp"
+            android:layout_toEndOf="@+id/sortDistanceButton"
+            android:background="@drawable/custom_background"
+            android:backgroundTint="@color/white"
+            android:textOff="Available Spot"
+            android:textOn="Available Spot"
+            android:textSize="8sp"
+            android:textStyle="bold" />
     </RelativeLayout>
 
-</LinearLayout>
+    <include
+        layout="@layout/bottom_sheet_persistent" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
