@@ -18,6 +18,21 @@
             android:layout_height="match_parent"
             tools:context=".MapsActivity" />
 
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floatingActionButton"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="50dp"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/search_bar"
+            app:srcCompat="@drawable/common_full_open_on_phone" />
+
         <SearchView
             android:id="@+id/search_bar"
             android:layout_width="364dp"
@@ -31,11 +46,14 @@
             android:layout_marginEnd="23dp"
             android:layout_marginBottom="668dp"
             android:background="@drawable/custom_background"
-            android:queryHint="Search......"
             android:queryBackground="@android:color/transparent"
+            android:queryHint="Search......"
             android:searchIcon="@drawable/ic_baseline_edit_location_24"
             android:visibility="visible"
-            tools:visibility="visible" />
+            tools:visibility="visible">
+
+
+        </SearchView>
 
     </RelativeLayout>
 

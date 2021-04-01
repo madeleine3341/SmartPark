@@ -1,13 +1,18 @@
 package com.team19.smartpark;
 
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -26,16 +31,18 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.team19.smartpark.models.Parking;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +65,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
     //ArrayList to hold all parking objects
-    private ArrayList<Parking> parkings;
+    private LinkedHashMap<String, Parking> parkings;
+    private FloatingActionButton fab;
 
 
     @Override
@@ -74,8 +82,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Construct a FusedLocationProviderClient.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        fab = findViewById(R.id.floatingActionButton);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ParkingListActivity.class);
+                startActivity(intent);
+            }
+        });
+        try {
+            searchView = findViewById(R.id.search_bar);
+            int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            TextView textView = searchView.findViewById(id);
+            textView.setTextColor(Color.BLACK);
 
-        searchView = findViewById(R.id.search_bar);
+        } catch (NullPointerException ignore) {
+
+        }
+        searchView.onWindowFocusChanged(false);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -88,9 +112,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    Address address = addressList.get(0);
-                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+                    Address address = null;
+                    try {
+                        address = addressList.get(0);
+
+                    } catch (IndexOutOfBoundsException ignore) {
+
+                    }
+                    if (address != null) {
+                        LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Adress not found", Toast.LENGTH_SHORT).show();
+                    }
+                    searchView.clearFocus();
                 }
                 return false;
             }
@@ -116,6 +151,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         getDeviceLocation();
         setMarkers();
 
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+
+            @Override
+            public void onInfoWindowClick(Marker arg0) {
+                Intent intent = new Intent(getApplicationContext(), ParkingInfoActivity.class);
+                String reference = arg0.getTitle();
+                intent.putExtra("reference", reference);
+
+                // Starting the  Activity
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void setMarkers() {
@@ -125,19 +173,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 Iterable<DataSnapshot> parkings = dataSnapshot.getChildren();
                 //array list to hold all parking lots
-                ArrayList<Parking> parkingsList = new ArrayList<Parking>();
+                LinkedHashMap<String, Parking> parkingsList = new LinkedHashMap<String, Parking>();
                 for (DataSnapshot parking :
                         parkings) {
+                    parking.getKey();
                     //put all parking lots in the array list
-                    parkingsList.add(parking.getValue(Parking.class));
+                    parkingsList.put(parking.getKey(), parking.getValue(Parking.class));
                 }
                 //for each parking create a marker and populate it with its stats, if marker already created, just updated
-                for (Parking parking :
-                        parkingsList) {
+                for (Map.Entry<String, Parking> parkingSet :
+                        parkingsList.entrySet()) {
+                    Parking parking = parkingSet.getValue();
                     int count = parking.spots.size();
                     int available = Collections.frequency(parking.spots.values(), true);
-                    String parkingName = parking.name;
-                    Marker previousMarker = mMarkerMap.get(parkingName);
+                    String parkingId = parkingSet.getKey();
+                    Marker previousMarker = mMarkerMap.get(parkingId);
                     // if previous marker already exists just update its availability
                     if (previousMarker != null) {
                         Log.d(TAG, "onDataChange: previous marker exists, update availability");
@@ -151,12 +201,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     else {
                         Log.d(TAG, "onDataChange: create new marker");
                         LatLng parkingLocation = new LatLng(parking.lat, parking.lng);
-                        MarkerOptions parkingMarker = new MarkerOptions().position(parkingLocation).title(parkingName).snippet(available + "/" + count + " available");
+                        MarkerOptions parkingMarker = new MarkerOptions().position(parkingLocation).title(parking.name).snippet(available + "/" + count + " available");
 //                    parkingMarker.icon(BitmapDescriptorFactory.fromResource(R.drawable.parking_icon));
                         //put the new marker on the map to display it
                         Marker marker = mMap.addMarker(parkingMarker);
                         // add the market to the hashmap to remember it next time (keep track of it)
-                        mMarkerMap.put(parkingName, marker);
+                        mMarkerMap.put(parking.name, marker);
                     }
 
                 }

@@ -1,6 +1,7 @@
-package com.team19.smartpark;
+package com.team19.smartpark.models;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,9 +13,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.team19.smartpark.models.Parking;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map;
 
 public class FirebaseHelper {
@@ -48,38 +51,10 @@ public class FirebaseHelper {
         mDatabase.push().setValue(parking);
     }
 
-    public static void addParkingSpot(Parking parking, String id) {
-        Map<String, Object> spot = new HashMap<String, Object>();
-        spot.put(id, true);
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-        mDatabase.orderByChild("name").equalTo(parking.name).addChildEventListener(new ChildEventListener() {
-            @SuppressLint("RestrictedApi")
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                snapshot.getRef().child("spots").updateChildren(spot);
+    public static void addParkingSpot(String parkingId, Map<String, Object> spots) {
 
+        FirebaseDatabase.getInstance().getReference(parkingId).child("spots").updateChildren(spots);
+        Log.d("TAG", "addParkingSpot: ");
 
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 }
