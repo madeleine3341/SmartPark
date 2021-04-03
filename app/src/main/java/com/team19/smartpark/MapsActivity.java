@@ -12,11 +12,14 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -56,9 +59,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, AdapterView.OnItemSelectedListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int DEFAULT_ZOOM = 15;
@@ -78,10 +80,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ListView filterListView;
     private LinearLayoutManager llm;
     private Button nearbyButton, clearButton;
-    private ToggleButton sDistanceButton, sASButton;
+    private ToggleButton sASButton;
+    private Spinner sDistanceButton;
     private TextView textView;
     private LatLng cameraLatLng;
     private BottomSheetBehavior mbottomSheetBehavior;
+    private int spinnerPosition;
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
     private boolean locationPermissionGranted;
@@ -91,6 +95,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //ArrayList to hold all parking objects
     private LinkedHashMap<String, Parking> parkings;
     private FloatingActionButton fab;
+    private FloatingActionButton myLocationButton;
 
 
     @Override
@@ -108,6 +113,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mDatabase = FirebaseDatabase.getInstance().getReference();
         filterUISetup();
         fab = findViewById(R.id.floatingActionButton);
+        myLocationButton = findViewById(R.id.myLocationButton);
+        myLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng latLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+            }
+        });
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,6 +149,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
+                cameraLatLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
                 updateFilterUI(false);
                 return false;
             }
@@ -368,38 +382,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         nearbyButton = findViewById(R.id.nearbyButton);
         textView = findViewById(R.id.sortTextView);
         sDistanceButton = findViewById(R.id.sortDistanceButton);
-        sASButton = findViewById(R.id.sortPriceButton);
+        sASButton = findViewById(R.id.sortASButton);
         clearButton = findViewById(R.id.clearButton);
         updateFilterUI(false);
-
-        sDistanceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!sDistanceButton.isChecked() && !sASButton.isChecked()) {
-                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-                else if(!sDistanceButton.isChecked()){
-                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                }
-                else{
-                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
-                    sortAlgorithm();
-                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                }
-            }
-        });
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.string, R.layout.spinner_custom_drop_down_menu);
+        adapter.setDropDownViewResource(R.layout.spinner_custom_drop_down_menu);
+        sDistanceButton.setAdapter(adapter);
+        sDistanceButton.setOnItemSelectedListener(this);
         sASButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!sDistanceButton.isChecked() && !sASButton.isChecked()) {
-                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                if(!sASButton.isChecked() && spinnerPosition == 0) {
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
                 else if(!sASButton.isChecked()){
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sortAlgorithm();
                 }
                 else{
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
@@ -418,9 +417,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 updateFilterUI(false);
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+                sDistanceButton.setSelection(0);
             }
         });
+    }
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        spinnerPosition = position;
+        if(parent.getItemAtPosition(position) != null && position != 0) {
+            String text = parent.getItemAtPosition(position).toString();
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+            sortAlgorithm();
+            mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
+        else if(position == 0 && !sASButton.isChecked()){
+            mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
     private void updateFilterUI(Boolean state){
         if(state){
@@ -433,6 +451,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
         else{
+            mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             nearbyButton.setVisibility(View.VISIBLE);
             sDistanceButton.setVisibility(View.GONE);
             sASButton.setVisibility(View.GONE);
@@ -441,39 +460,67 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             linearLayout.setVisibility(View.GONE);
             sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
             sASButton.setChecked(false);
-            sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-            sDistanceButton.setChecked(false);
-            mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
     private void sortAlgorithm() {
+        //Create two float to store distance between two locations
         float result1[] = new float[1];
         float result2[] = new float[1];
+        int radius;
+            switch (spinnerPosition) {
+                case 1:
+                    radius = 100;
+                    break;
+                case 2:
+                    radius = 250;
+                    break;
+                case 3:
+                    radius = 500;
+                    break;
+                case 4:
+                    radius = 1000;
+                    break;
+                case 5:
+                    radius = 2000;
+                    break;
+                default:
+                    if(sASButton.isChecked()){
+                        radius = 2000;
+                    }
+                    else {
+                        radius = 0;
+                    }
+                    break;
+            }
+        //Create an ArrayList of Parking object
         ArrayList<Parking> filter = new ArrayList<Parking>();
+        //Create an ArrayList of String to store distance information
         ArrayList<String> distance = new ArrayList<String>();
-        TreeMap<String, Parking> fList = new TreeMap<>();
         for (Map.Entry<String, Parking> parkingSet : parkingsList.entrySet()) {
             Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, parkingSet.getValue().lat, parkingSet.getValue().lng, result1);
-            if(result1[0] < 2000){
-            filter.add(parkingSet.getValue());
+            if(result1[0] < radius){
+                filter.add(parkingSet.getValue());
             }
         }
-        // Distance Sort
+        // Bubble Sorting
             for (int i = 0; i < filter.size(); i++) {
                 for (int j = i + 1; j < filter.size(); j++) {
-                    if (sDistanceButton.isChecked() && !sASButton.isChecked()) {
+                    //Sort by Distance
+                    if (!sASButton.isChecked() && spinnerPosition > 0) {
                         Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
                         Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
                         if (result1[0] > result2[0]) {
                             Collections.swap(filter, j, i);
                         }
                     }
-                    else if (!sDistanceButton.isChecked() && sASButton.isChecked()) {
+                    //Sort by Available Spots
+                    else if (sASButton.isChecked() && spinnerPosition == 0) {
                         if(Collections.frequency(filter.get(i).spots.values(), true) < Collections.frequency(filter.get(j).spots.values(), true)){
                             Collections.swap(filter, i, j);
                         }
                     }
-                    else if(sDistanceButton.isChecked() && sASButton.isChecked()){
+                    //Sort by Distance and Available Spots
+                    else if(sASButton.isChecked() && spinnerPosition > 0){
                         Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
                         float spot1 = Collections.frequency(filter.get(i).spots.values(), true)/filter.get(i).spots.size();
                         Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
@@ -487,11 +534,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
             }
-
+        //Get the distance information of the sorted parking array list
         for (int i = 0; i < filter.size(); i++) {
             Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
             distance.add(String.format("%.0f", result1[0]));
         }
+        //Set the adapter for the List View
         filterListAdapter adapter = new filterListAdapter(this, R.layout.adapter_bottom_sheet_list_view, filter, distance);
         filterListView.setAdapter(adapter);
     }

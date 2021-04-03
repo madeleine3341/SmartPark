@@ -1,6 +1,7 @@
 package com.team19.smartpark.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +42,12 @@ public class filterListAdapter extends ArrayAdapter<String> {
         }
     }
     public int getCount() {
-        return parkingInfo.size();
+        if(parkingInfo.size() == 0){
+            return 1;
+        }
+        else {
+            return parkingInfo.size();
+        }
     }
 
 
@@ -61,20 +67,33 @@ public class filterListAdapter extends ArrayAdapter<String> {
         TextView address = (TextView) convertView.findViewById(R.id.addressFilterTextView);
         TextView status = (TextView) convertView.findViewById(R.id.statusFilterTextView);
         TextView distance = (TextView) convertView.findViewById(R.id.distanceTextView2);
+        TextView textView1 = (TextView) convertView.findViewById(R.id.distanceTextView);
         TextView availablespots = (TextView) convertView.findViewById(R.id.availableSpotTextView2);
-
-        name.setText(parkingInfo.get(position).name);
-        address.setText(parkingInfo.get(position).address);
-        String stat = null;
-        if(Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0){
-            stat = "Available";
+        TextView textView2 = (TextView) convertView.findViewById(R.id.availableSpotTextView);
+        TextView noResult = (TextView) convertView.findViewById(R.id.noResultTextView);
+        if(parkingInfo.size() > 0) {
+            name.setText(parkingInfo.get(position).name);
+            address.setText(parkingInfo.get(position).address);
+            String stat = null;
+            if (Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
+                stat = "Available";
+            } else {
+                stat = "Not Available";
+            }
+            status.setText("Status: " + stat);
+            distance.setText(fdistance.get(position) + " m");
+            availablespots.setText(avSpots.get(position));
         }
         else{
-            stat = "Not Available";
+            name.setText("");
+            address.setText("");
+            status.setText("");
+            distance.setText("");
+            availablespots.setText("");
+            textView1.setText("");
+            textView2.setText("");
+            noResult.setText("No Available Parking Lot");
         }
-        status.setText("Status: " + stat);
-        distance.setText(fdistance.get(position) + " m");
-        availablespots.setText(avSpots.get(position));
         return convertView;
     }
 }
