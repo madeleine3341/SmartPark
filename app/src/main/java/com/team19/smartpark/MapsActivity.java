@@ -1,6 +1,7 @@
 package com.team19.smartpark;
 
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,9 +10,13 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -162,6 +167,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (address != null) {
                         nearbyButton.setVisibility(View.VISIBLE);
                         LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                        //    double lat=address.getLatitude();
+                        //   double lon=address.getLongitude();
+
                         cameraLatLng = latLng;
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
                     } else {
@@ -181,6 +189,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
     }
+
+
+    //send to google map show directions
+        public void DisplayTrack(String destination) {
+            getDeviceLocation();
+            Double la=lastKnownLocation.getLatitude();
+            Double lo=lastKnownLocation.getLongitude();
+//            for (Map.Entry<Double, Double> userLocationn: CurrentLocationCoordinates().entrySet()){
+//            la=userLocationn.getValue();
+//            lo=userLocationn.getKey();}
+
+
+        try {
+            Uri uri = Uri.parse("https://www.google.co.in/maps/dir/" + la +","+ lo + "/" + destination);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.google.android.apps.maps");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+
+
+        } catch (ActivityNotFoundException e) {
+            Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.maps");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+
+    }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -306,6 +343,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (locationPermissionGranted) {
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
+//              String What=  mMap.getUiSettings().toString();
                 mMap.getUiSettings().setMapToolbarEnabled(true);
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
@@ -340,11 +378,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
                             lastKnownLocation = task.getResult();
+//                            double lat = lastKnownLocation.getLatitude();
+//                            double lon = lastKnownLocation.getLongitude();
+
                             if (lastKnownLocation != null) {
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(lastKnownLocation.getLatitude(),
                                                 lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                                cameraLatLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
+                                cameraLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+
                             }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
@@ -372,19 +414,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         clearButton = findViewById(R.id.clearButton);
         updateFilterUI(false);
 
+
         sDistanceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!sDistanceButton.isChecked() && !sASButton.isChecked()) {
+                if (!sDistanceButton.isChecked() && !sASButton.isChecked()) {
                     sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-                else if(!sDistanceButton.isChecked()){
+                } else if (!sDistanceButton.isChecked()) {
                     sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                }
-                else{
-                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                } else {
+                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235, 236, 246)));
                     sortAlgorithm();
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
@@ -393,16 +434,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sASButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!sDistanceButton.isChecked() && !sASButton.isChecked()) {
+                if (!sDistanceButton.isChecked() && !sASButton.isChecked()) {
                     sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-                else if(!sASButton.isChecked()){
+                } else if (!sASButton.isChecked()) {
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                }
-                else{
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                } else {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235, 236, 246)));
                     sortAlgorithm();
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
@@ -422,8 +461,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
-    private void updateFilterUI(Boolean state){
-        if(state){
+
+    private void updateFilterUI(Boolean state) {
+        if (state) {
             nearbyButton.setVisibility(View.GONE);
             sDistanceButton.setVisibility(View.VISIBLE);
             sASButton.setVisibility(View.VISIBLE);
@@ -431,8 +471,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             clearButton.setVisibility(View.VISIBLE);
             linearLayout.setVisibility(View.VISIBLE);
 
-        }
-        else{
+        } else {
             nearbyButton.setVisibility(View.VISIBLE);
             sDistanceButton.setVisibility(View.GONE);
             sASButton.setVisibility(View.GONE);
@@ -454,39 +493,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         TreeMap<String, Parking> fList = new TreeMap<>();
         for (Map.Entry<String, Parking> parkingSet : parkingsList.entrySet()) {
             Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, parkingSet.getValue().lat, parkingSet.getValue().lng, result1);
-            if(result1[0] < 2000){
-            filter.add(parkingSet.getValue());
+            if (result1[0] < 2000) {
+                filter.add(parkingSet.getValue());
             }
         }
         // Distance Sort
-            for (int i = 0; i < filter.size(); i++) {
-                for (int j = i + 1; j < filter.size(); j++) {
-                    if (sDistanceButton.isChecked() && !sASButton.isChecked()) {
-                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
-                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
-                        if (result1[0] > result2[0]) {
-                            Collections.swap(filter, j, i);
-                        }
+        for (int i = 0; i < filter.size(); i++) {
+            for (int j = i + 1; j < filter.size(); j++) {
+                if (sDistanceButton.isChecked() && !sASButton.isChecked()) {
+                    Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
+                    Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
+                    if (result1[0] > result2[0]) {
+                        Collections.swap(filter, j, i);
                     }
-                    else if (!sDistanceButton.isChecked() && sASButton.isChecked()) {
-                        if(Collections.frequency(filter.get(i).spots.values(), true) < Collections.frequency(filter.get(j).spots.values(), true)){
-                            Collections.swap(filter, i, j);
-                        }
+                } else if (!sDistanceButton.isChecked() && sASButton.isChecked()) {
+                    if (Collections.frequency(filter.get(i).spots.values(), true) < Collections.frequency(filter.get(j).spots.values(), true)) {
+                        Collections.swap(filter, i, j);
                     }
-                    else if(sDistanceButton.isChecked() && sASButton.isChecked()){
-                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
-                        float spot1 = Collections.frequency(filter.get(i).spots.values(), true)/filter.get(i).spots.size();
-                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
-                        float spot2 = Collections.frequency(filter.get(j).spots.values(), true)/filter.get(j).spots.size();
-                        float score1 = (float) (0.8*(1-result1[0]/2000) + 0.2*spot1);
-                        float score2 = (float) (0.8*(1-result2[0]/2000) + 0.2*spot2);
-                        if(score1>score2){
-                            Collections.swap(filter,j,i);
-                        }
+                } else if (sDistanceButton.isChecked() && sASButton.isChecked()) {
+                    Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
+                    float spot1 = Collections.frequency(filter.get(i).spots.values(), true) / filter.get(i).spots.size();
+                    Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
+                    float spot2 = Collections.frequency(filter.get(j).spots.values(), true) / filter.get(j).spots.size();
+                    float score1 = (float) (0.8 * (1 - result1[0] / 2000) + 0.2 * spot1);
+                    float score2 = (float) (0.8 * (1 - result2[0] / 2000) + 0.2 * spot2);
+                    if (score1 > score2) {
+                        Collections.swap(filter, j, i);
                     }
-
                 }
+
             }
+        }
 
         for (int i = 0; i < filter.size(); i++) {
             Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
@@ -496,7 +533,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         filterListView.setAdapter(adapter);
     }
 
-    public void updateview(LatLng latLng){
+    public void updateview(LatLng latLng) {
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 20));
     }
 }

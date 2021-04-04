@@ -1,6 +1,9 @@
 package com.team19.smartpark.adapters;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,12 +54,18 @@ public class filterListAdapter extends ArrayAdapter<String> {
         convertView = inflater.inflate(mylayout,parent,false);
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Toast.makeText(fcontext, parkingInfo.get(position).name, Toast.LENGTH_SHORT).show();
-                LatLng latLng = new LatLng(parkingInfo.get(position).lat,parkingInfo.get(position).lng);
-                ((MapsActivity)fcontext).updateview(latLng);
+           public void onClick(View v) {
+
+
+             //   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ((MapsActivity)fcontext).DisplayTrack(parkingInfo.get(position).address);
+
+//                Toast.makeText(fcontext, parkingInfo.get(position).name, Toast.LENGTH_SHORT).show();
+//                LatLng latLng = new LatLng(parkingInfo.get(position).lat,parkingInfo.get(position).lng);
+//
             }
         });
+
         TextView name = (TextView) convertView.findViewById(R.id.nameFilterTextView);
         TextView address = (TextView) convertView.findViewById(R.id.addressFilterTextView);
         TextView status = (TextView) convertView.findViewById(R.id.statusFilterTextView);
@@ -65,6 +74,11 @@ public class filterListAdapter extends ArrayAdapter<String> {
 
         name.setText(parkingInfo.get(position).name);
         address.setText(parkingInfo.get(position).address);
+//
+//        ArrayList <String> ParkingAdrress= new ArrayList<>();
+//        ParkingAdrress.add(parkingInfo.get(position).address);
+
+
         String stat = null;
         if(Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0){
             stat = "Available";
@@ -77,4 +91,5 @@ public class filterListAdapter extends ArrayAdapter<String> {
         availablespots.setText(avSpots.get(position));
         return convertView;
     }
+
 }
