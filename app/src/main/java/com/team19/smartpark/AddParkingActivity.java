@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -32,7 +33,8 @@ public class AddParkingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parking);
-
+        ActionBar ab;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         saveBtn = findViewById(R.id.saveBtn);
         nameTextView = findViewById(R.id.nameTextView);
         addressTextView = findViewById(R.id.addressTextView);

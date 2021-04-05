@@ -22,11 +22,21 @@
         android:theme="@style/Theme.SmartPark"
         android:usesCleartextTraffic="true">
         <activity android:name=".MainActivity" />
-        <activity android:name=".ParkingListActivity" />
-        <activity android:name=".AddParkingActivity" />
-        <activity android:name=".LinkSensorActivity" />
-        <activity android:name=".ParkingSpotsActivity" />
-        <activity android:name=".ParkingInfoActivity" />
+        <activity android:name=".ParkingListActivity"
+           android:parentActivityName=".MapsActivity"
+            ></activity>
+        <activity android:name=".AddParkingActivity"
+            android:parentActivityName=".ParkingListActivity"
+            ></activity>
+        <activity android:name=".LinkSensorActivity"
+            android:parentActivityName=".ParkingSpotsActivity"
+            ></activity>
+        <activity android:name=".ParkingSpotsActivity"
+            android:parentActivityName=".ParkingListActivity"
+            ></activity>
+        <activity android:name=".ParkingInfoActivity"
+            android:parentActivityName=".MapsActivity"
+            ></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").

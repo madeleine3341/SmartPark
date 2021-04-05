@@ -37,6 +37,8 @@ public class ParkingSpotsActivity extends AppCompatActivity {
         parkingGrid = findViewById(R.id.parkingGrid);
         gridLayoutManager = new GridLayoutManager(this, 4, GridLayoutManager.VERTICAL, false);
         parkingGrid.setLayoutManager(gridLayoutManager);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         mDatabase = FirebaseDatabase.getInstance().getReference(parkingPath + "/spots"); //path to parking to be put here
         mDatabase.orderByKey().addValueEventListener(new ValueEventListener() {
