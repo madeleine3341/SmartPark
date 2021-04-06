@@ -8,5 +8,10 @@
         android:title="Add parking spot"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/action_removeParkingSpot"
+        android:icon="@android:drawable/ic_delete"
+        android:title="Remove a parking spot"
+        app:showAsAction="never" />
 
 </menu>

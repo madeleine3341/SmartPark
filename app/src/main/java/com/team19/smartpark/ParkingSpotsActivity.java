@@ -43,7 +43,7 @@ public class ParkingSpotsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 TreeMap<String, Boolean> spots = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
-                loadList(spots, getSupportFragmentManager());
+                loadList(spots, getSupportFragmentManager(), false);
             }
 
             @Override
@@ -54,8 +54,8 @@ public class ParkingSpotsActivity extends AppCompatActivity {
 
     }
 
-    private void loadList(TreeMap<String, Boolean> spots, FragmentManager supportFragmentManager) {
-        adapter = new ParkingSpotAdapter(this, spots, supportFragmentManager);
+    private void loadList(TreeMap<String, Boolean> spots, FragmentManager supportFragmentManager, Boolean deleteMode) {
+        adapter = new ParkingSpotAdapter(this, spots, supportFragmentManager, deleteMode);
         parkingGrid.setAdapter(adapter);
     }
 
@@ -73,7 +73,21 @@ public class ParkingSpotsActivity extends AppCompatActivity {
             AddParkingSpotsFragment dialog = new AddParkingSpotsFragment();
             dialog.show(getSupportFragmentManager(), "AddParkingSpotFragment");
             return true;
-        }// If we got here, the user's action was not recognized.
+        } else if (item.getItemId() == R.id.action_removeParkingSpot) {
+//             If we got here, the user's action was not recognized.
+            mDatabase.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    TreeMap<String, Boolean> spots = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
+                    loadList(spots, getSupportFragmentManager(), true);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
         // Invoke the superclass to handle it.
         return super.onOptionsItemSelected(item);
     }
