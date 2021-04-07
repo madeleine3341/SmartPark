@@ -91,7 +91,7 @@ public class ParkingInfoActivity  extends AppCompatActivity {
 
                 Iterable<DataSnapshot> parkings = dataSnapshot.getChildren();
                 HashMap<String, Boolean> temp = new HashMap<String, Boolean>();
-                Parking targetParking = new Parking("N/A",0,0,"N/A",temp,false);
+                Parking targetParking = new Parking("N/A",0,0,"N/A",temp,false,0);
                 //array list to hold all parking lots
                 LinkedHashMap<String, Parking> parkingsList = new LinkedHashMap<String, Parking>();
                 for (DataSnapshot parking :

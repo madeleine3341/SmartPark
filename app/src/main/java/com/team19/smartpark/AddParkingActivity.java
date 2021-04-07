@@ -24,6 +24,7 @@ public class AddParkingActivity extends AppCompatActivity {
     private EditText latTextView;
     private EditText lngTextView;
     private EditText spotsTextView;
+    private EditText feesTextView;
 
     private FloatingActionButton actionBtn;
 
@@ -39,12 +40,16 @@ public class AddParkingActivity extends AppCompatActivity {
         latTextView = findViewById(R.id.latTextView);
         lngTextView = findViewById(R.id.lngTextView);
         spotsTextView = findViewById(R.id.spotsTextView);
+        feesTextView =findViewById(R.id.feesTextView);
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String name = nameTextView.getText().toString();
                 String address = addressTextView.getText().toString();
+                String fee=feesTextView.getText().toString();
+                double fees = Double.parseDouble(fee);
+
                 String strSpots = spotsTextView.getText().toString();
                 strSpots = strSpots.replace(" ", "");
                 String[] spots = strSpots.split(",");
@@ -66,13 +71,14 @@ public class AddParkingActivity extends AppCompatActivity {
 
                 }
 
-                if (!name.isEmpty() && !address.isEmpty() && lat != 0.0 && lng != 0.0) {
+                if (!name.isEmpty() && !address.isEmpty() && lat != 0.0 && lng != 0.0 && !fee.isEmpty()) {
                     Parking parking = new Parking();
                     parking.address = address;
                     parking.lat = lat;
                     parking.lng = lng;
                     parking.name = name;
                     parking.spots = hashspot;
+                    parking.fees=fees;
                     FirebaseHelper.addParkingLots(parking);
                     Toast.makeText(getApplicationContext(), "Parking added successfully", Toast.LENGTH_SHORT).show();
                     finish();
