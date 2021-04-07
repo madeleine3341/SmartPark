@@ -83,7 +83,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ListView filterListView;
     private LinearLayoutManager llm;
     private Button nearbyButton, clearButton;
-    private ToggleButton sDistanceButton, sASButton;
+    private ToggleButton sDistanceButton, sASButton, sFeesButton;
     private TextView textView;
     private LatLng cameraLatLng;
     private BottomSheetBehavior mbottomSheetBehavior;
@@ -410,6 +410,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         nearbyButton = findViewById(R.id.nearbyButton);
         textView = findViewById(R.id.sortTextView);
         sDistanceButton = findViewById(R.id.sortDistanceButton);
+        sFeesButton = findViewById(R.id.sortFeesButton);
         sASButton = findViewById(R.id.sortPriceButton);
         clearButton = findViewById(R.id.clearButton);
         updateFilterUI(false);
@@ -467,6 +468,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             nearbyButton.setVisibility(View.GONE);
             sDistanceButton.setVisibility(View.VISIBLE);
             sASButton.setVisibility(View.VISIBLE);
+            sFeesButton.setVisibility(View.VISIBLE);
             textView.setVisibility(View.VISIBLE);
             clearButton.setVisibility(View.VISIBLE);
             linearLayout.setVisibility(View.VISIBLE);
@@ -475,6 +477,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             nearbyButton.setVisibility(View.VISIBLE);
             sDistanceButton.setVisibility(View.GONE);
             sASButton.setVisibility(View.GONE);
+            sFeesButton.setVisibility(View.GONE);
             textView.setVisibility(View.GONE);
             clearButton.setVisibility(View.GONE);
             linearLayout.setVisibility(View.GONE);
@@ -488,9 +491,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void sortAlgorithm() {
         float result1[] = new float[1];
         float result2[] = new float[1];
+        float ressult3[]= new float[1];
         ArrayList<Parking> filter = new ArrayList<Parking>();
         ArrayList<String> distance = new ArrayList<String>();
-        TreeMap<String, Parking> fList = new TreeMap<>();
+//        TreeMap<String, Parking> fList = new TreeMap<>();
+
         for (Map.Entry<String, Parking> parkingSet : parkingsList.entrySet()) {
             Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, parkingSet.getValue().lat, parkingSet.getValue().lng, result1);
             if (result1[0] < 2000) {

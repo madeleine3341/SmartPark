@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,10 @@ public class filterListAdapter extends ArrayAdapter<String> {
     private ArrayList<Parking> parkingInfo = new ArrayList<Parking>();
     private ArrayList<String> fdistance = new ArrayList<String>();
     private ArrayList<String> avSpots = new ArrayList<String>();
+    private ArrayList<String> ffees = new ArrayList<String>();
+    private Button directions;
+
+
 
     public filterListAdapter(Context context, int resource, ArrayList<Parking> parkingInfo, ArrayList<String> distance) {
         super(context, resource);
@@ -70,6 +75,7 @@ public class filterListAdapter extends ArrayAdapter<String> {
         TextView address = (TextView) convertView.findViewById(R.id.addressFilterTextView);
         TextView status = (TextView) convertView.findViewById(R.id.statusFilterTextView);
         TextView distance = (TextView) convertView.findViewById(R.id.distanceTextView2);
+        TextView fees = (TextView) convertView.findViewById(R.id.FeesFilterTextView);
         TextView availablespots = (TextView) convertView.findViewById(R.id.availableSpotTextView2);
 
         name.setText(parkingInfo.get(position).name);
