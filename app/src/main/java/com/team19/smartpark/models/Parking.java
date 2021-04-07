@@ -6,6 +6,7 @@ public class Parking {
     public String address;
     public double lat;
     public double lng;
+    public double fees;
     public String name;
     public HashMap<String, Boolean> spots;
     public boolean status;
@@ -13,13 +14,14 @@ public class Parking {
     public Parking() {
     }
 
-    public Parking(String address, double lat, double lng, String name, HashMap<String, Boolean> spots, boolean status) {
+    public Parking(String address, double lat, double lng, String name, HashMap<String, Boolean> spots, boolean status,double fees) {
         this.address = address;
         this.lat = lat;
         this.lng = lng;
         this.name = name;
         this.spots = spots;
         this.status = status;
+        this.fees=fees;
     }
 
     @Override
@@ -31,6 +33,8 @@ public class Parking {
                 ", name='" + name + '\'' +
                 ", spots=" + spots +
                 ", status=" + status +
+                ", fees=" + fees +
+
                 '}';
     }
 
@@ -80,5 +84,13 @@ public class Parking {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public double getfees() {
+        return fees;
+    }
+
+    public void setfees(double fees) {
+        this.fees = fees;
     }
 }
