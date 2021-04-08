@@ -1,5 +1,7 @@
 package com.team19.smartpark.models;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.HashMap;
 
 public class Parking {
@@ -80,5 +82,10 @@ public class Parking {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public void setLatLng(LatLng latLng) {
+        lat = latLng.latitude;
+        lng = latLng.longitude;
     }
 }
