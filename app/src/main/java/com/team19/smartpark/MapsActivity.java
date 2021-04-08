@@ -196,9 +196,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             getDeviceLocation();
             Double la=lastKnownLocation.getLatitude();
             Double lo=lastKnownLocation.getLongitude();
-//            for (Map.Entry<Double, Double> userLocationn: CurrentLocationCoordinates().entrySet()){
-//            la=userLocationn.getValue();
-//            lo=userLocationn.getKey();}
 
 
         try {

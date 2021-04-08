@@ -57,19 +57,16 @@ public class filterListAdapter extends ArrayAdapter<String> {
     public View getView(int position, View convertView, ViewGroup parent){
         LayoutInflater inflater = LayoutInflater.from(fcontext);
         convertView = inflater.inflate(mylayout,parent,false);
-        convertView.setOnClickListener(new View.OnClickListener() {
+        directions= (Button) convertView.findViewById(R.id.directionsbutton);
+        directions.setOnClickListener(new View.OnClickListener() {
             @Override
-           public void onClick(View v) {
+            public void onClick(View v) {
 
-
-             //   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ((MapsActivity)fcontext).DisplayTrack(parkingInfo.get(position).address);
 
-//                Toast.makeText(fcontext, parkingInfo.get(position).name, Toast.LENGTH_SHORT).show();
-//                LatLng latLng = new LatLng(parkingInfo.get(position).lat,parkingInfo.get(position).lng);
-//
             }
         });
+
 
         TextView name = (TextView) convertView.findViewById(R.id.nameFilterTextView);
         TextView address = (TextView) convertView.findViewById(R.id.addressFilterTextView);
@@ -80,9 +77,6 @@ public class filterListAdapter extends ArrayAdapter<String> {
 
         name.setText(parkingInfo.get(position).name);
         address.setText(parkingInfo.get(position).address);
-//
-//        ArrayList <String> ParkingAdrress= new ArrayList<>();
-//        ParkingAdrress.add(parkingInfo.get(position).address);
 
 
         String stat = null;
