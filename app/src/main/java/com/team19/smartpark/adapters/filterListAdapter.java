@@ -77,6 +77,8 @@ public class filterListAdapter extends ArrayAdapter<String> {
 
         name.setText(parkingInfo.get(position).name);
         address.setText(parkingInfo.get(position).address);
+        fees.setText("Fees: "+Double.toString(parkingInfo.get(position).fees)+"$");
+
 
 
         String stat = null;
