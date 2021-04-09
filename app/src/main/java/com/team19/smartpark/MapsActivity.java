@@ -412,14 +412,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         clearButton = findViewById(R.id.clearButton);
         updateFilterUI(false);
 
+        sFeesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!sDistanceButton.isChecked() && !sASButton.isChecked() && sFeesButton.isChecked()) {
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+                else if (!sASButton.isChecked()&&!sDistanceButton.isChecked()) {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                } else if (!sASButton.isChecked()) {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                } else if (!sDistanceButton.isChecked()) {
+                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                } else {
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235, 236, 246)));
+                    sortAlgorithm();
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+            }
+        });
 
         sDistanceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!sDistanceButton.isChecked() && !sASButton.isChecked()) {
+                if (sDistanceButton.isChecked() && !sASButton.isChecked()&& !sFeesButton.isChecked()) {
                     sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                } else if (!sDistanceButton.isChecked()&& !sASButton.isChecked()) {
+                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                } else if (!sDistanceButton.isChecked()&& !sFeesButton.isChecked()) {
+                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                 } else if (!sDistanceButton.isChecked()) {
                     sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                 } else {
@@ -432,10 +462,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sASButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!sDistanceButton.isChecked() && !sASButton.isChecked()) {
+                if (!sDistanceButton.isChecked() && sASButton.isChecked()&& !sFeesButton.isChecked()) {
                     sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                } else if (!sASButton.isChecked()&& !sDistanceButton.isChecked()) {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                } else if (!sASButton.isChecked()&& !sFeesButton.isChecked()) {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                 } else if (!sASButton.isChecked()) {
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                 } else {
@@ -482,16 +519,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             sASButton.setChecked(false);
             sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
             sDistanceButton.setChecked(false);
+            sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+            sFeesButton.setChecked(false);
             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
     private void sortAlgorithm() {
         float result1[] = new float[1];
         float result2[] = new float[1];
-        float ressult3[]= new float[1];
+
         ArrayList<Parking> filter = new ArrayList<Parking>();
         ArrayList<String> distance = new ArrayList<String>();
-//        TreeMap<String, Parking> fList = new TreeMap<>();
 
         for (Map.Entry<String, Parking> parkingSet : parkingsList.entrySet()) {
             Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, parkingSet.getValue().lat, parkingSet.getValue().lng, result1);
@@ -502,17 +540,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Distance Sort
         for (int i = 0; i < filter.size(); i++) {
             for (int j = i + 1; j < filter.size(); j++) {
-                if (sDistanceButton.isChecked() && !sASButton.isChecked()) {
+                if (sDistanceButton.isChecked() && !sASButton.isChecked()&& !sFeesButton.isChecked()) {
                     Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
                     Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
                     if (result1[0] > result2[0]) {
                         Collections.swap(filter, j, i);
                     }
-                } else if (!sDistanceButton.isChecked() && sASButton.isChecked()) {
+                } else if (!sDistanceButton.isChecked() && sASButton.isChecked()&& !sFeesButton.isChecked()) {
                     if (Collections.frequency(filter.get(i).spots.values(), true) < Collections.frequency(filter.get(j).spots.values(), true)) {
                         Collections.swap(filter, i, j);
-                    }
-                } else if (sDistanceButton.isChecked() && sASButton.isChecked()) {
+                    }}
+
+                    else if (!sDistanceButton.isChecked() && !sASButton.isChecked() &&sFeesButton.isChecked()) {
+                        if (filter.get(i).fees < filter.get(j).fees) {
+                            Collections.swap(filter, i, j);
+                        }
+
+                } else if (sDistanceButton.isChecked() && sASButton.isChecked()&& !sFeesButton.isChecked()) {
                     Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
                     float spot1 = Collections.frequency(filter.get(i).spots.values(), true) / filter.get(i).spots.size();
                     Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
@@ -521,10 +565,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     float score2 = (float) (0.8 * (1 - result2[0] / 2000) + 0.2 * spot2);
                     if (score1 > score2) {
                         Collections.swap(filter, j, i);
-                    }
+                    }}
+                    else if (sDistanceButton.isChecked() && !sASButton.isChecked()&& sFeesButton.isChecked()) {
+                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
+                        float spot1 =1/(float)filter.get(i).fees;
+                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
+                        float spot2 = 1/(float)filter.get(j).fees;
+                        float score1 = (float) (0.8 * (1 - result1[0] / 2000) + 0.2 * spot1);
+                        float score2 = (float) (0.8 * (1 - result2[0] / 2000) + 0.2 * spot2);
+                        if (score1 > score2) {
+                            Collections.swap(filter, j, i);
+                        }
                 }
+                    else if (!sDistanceButton.isChecked() && sASButton.isChecked()&& sFeesButton.isChecked()) {
+                        float spot1a = Collections.frequency(filter.get(i).spots.values(), true) / filter.get(i).spots.size();
+                        float spot1b =1/(float)filter.get(i).fees;
+                        float spot2a = Collections.frequency(filter.get(j).spots.values(), true) / filter.get(i).spots.size();
+                        float spot2b = 1/(float)filter.get(j).fees;
+                        float score1 = (float) (0.8 * (1 - spot1a / 2000) + 0.2 * spot1b);
+                        float score2 = (float) (0.8 * (1 - spot2a / 2000) + 0.2 * spot2b);
+                        if (score1 > score2) {
+                            Collections.swap(filter, j, i);
+                        }
+                    }
 
-            }
+
+        }
         }
 
         for (int i = 0; i < filter.size(); i++) {
