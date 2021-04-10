@@ -96,8 +96,4 @@ public class ParkingListActivity extends AppCompatActivity {
         plist.setAdapter(adapter);
     }
 
-    private void goToParkingSpotsActivity() {
-        //Intent intent = new Intent(this, ParkingSpotsActivity.class);
-        //startActivity(intent);
-    }
 }
