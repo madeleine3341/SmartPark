@@ -4,9 +4,9 @@
     <string-array name="string">
         <item>Distance</item>
         <item>100 m</item>
-        <item>250 m</item>
+        <item>200 m</item>
+        <item>300 m</item>
+        <item>400 m</item>
         <item>500 m</item>
-        <item>1 km</item>
-        <item>2 km</item>
     </string-array>
 </resources>

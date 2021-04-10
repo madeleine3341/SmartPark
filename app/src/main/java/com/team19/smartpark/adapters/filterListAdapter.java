@@ -71,15 +71,11 @@ public class filterListAdapter extends ArrayAdapter<String> {
         TextView availablespots = (TextView) convertView.findViewById(R.id.availableSpotTextView2);
         TextView textView2 = (TextView) convertView.findViewById(R.id.availableSpotTextView);
         TextView noResult = (TextView) convertView.findViewById(R.id.noResultTextView);
-        if(parkingInfo.size() > 0) {
+        if(parkingInfo.size() > 0 && Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
             name.setText(parkingInfo.get(position).name);
             address.setText(parkingInfo.get(position).address);
             String stat = null;
-            if (Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
-                stat = "Available";
-            } else {
-                stat = "Not Available";
-            }
+            stat = "Available";
             status.setText("Status: " + stat);
             distance.setText(fdistance.get(position) + " m");
             availablespots.setText(avSpots.get(position));

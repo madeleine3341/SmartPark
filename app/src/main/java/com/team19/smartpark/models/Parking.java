@@ -1,12 +1,15 @@
 package com.team19.smartpark.models;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Parking {
     public String address;
     public double lat;
     public double lng;
+    public double fees;
     public String name;
+    public String operatingHour;
     public HashMap<String, Boolean> spots;
     public boolean status;
 
@@ -26,12 +29,30 @@ public class Parking {
     public String toString() {
         return "Parking{" +
                 "address='" + address + '\'' +
+                "Operating Hours='" + operatingHour +'\'' +
                 ", lat=" + lat +
                 ", lng=" + lng +
                 ", name='" + name + '\'' +
                 ", spots=" + spots +
                 ", status=" + status +
+                ", fees=" + fees +
                 '}';
+    }
+
+    public double getFees() {
+        return fees;
+    }
+
+    public void setFees(double fees) {
+        this.fees = fees;
+    }
+
+    public String getOperatingHour() {
+        return operatingHour;
+    }
+
+    public void setOperatingHour(String operatingHour) {
+        this.operatingHour = operatingHour;
     }
 
     public String getAddress() {

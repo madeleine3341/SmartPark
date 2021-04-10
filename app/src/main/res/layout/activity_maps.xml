@@ -10,7 +10,8 @@
     <RelativeLayout
         android:id="@+id/relativeLayout2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:visibility="gone">
 
         <fragment
             android:id="@+id/map"
@@ -80,6 +81,7 @@
             app:backgroundTint="@color/white"
             app:srcCompat="@drawable/ic_baseline_gps_fixed_24" />
 
+
     </RelativeLayout>
 
     <include layout="@layout/bottom_sheet_persistent" />
@@ -89,6 +91,90 @@
         android:layout_height="match_parent"
         app:layout_anchor="@+id/relativeLayout2"
         app:layout_anchorGravity="center">
+
+        <Button
+            android:id="@+id/clearButton"
+            android:layout_width="43dp"
+            android:layout_height="43dp"
+            android:background="@drawable/custom_background"
+            android:backgroundTint="@color/white"
+            android:text="X"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.956"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.099" />
+
+        <HorizontalScrollView
+            android:id="@+id/scrollViewFilter"
+            android:layout_width="239dp"
+            android:layout_height="43dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.569"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.1">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                tools:visibility="gone">
+
+                <Spinner
+                    android:id="@+id/sortDistanceButton"
+                    android:layout_width="98dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/custom_background"
+                    android:entries="@array/string"
+                    android:popupBackground="@drawable/custom_background" />
+
+                <ToggleButton
+                    android:id="@+id/sortASButton"
+                    android:layout_width="98dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/custom_background"
+                    android:backgroundTint="@color/white"
+                    android:textOff="Available Spot"
+                    android:textOn="Available Spot"
+                    android:textSize="8dp"
+                    android:textStyle="bold" />
+
+                <ToggleButton
+                    android:id="@+id/sortFeesButton"
+                    android:layout_width="98dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/custom_background"
+                    android:backgroundTint="@color/white"
+                    android:textOff="Fees"
+                    android:textOn="Fees"
+                    android:textSize="8dp"
+                    android:textStyle="bold" />
+
+                <ToggleButton
+                    android:id="@+id/openButton"
+                    android:layout_width="98dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/custom_background"
+                    android:backgroundTint="@color/white"
+                    android:textOff="Operating Hour"
+                    android:textOn="Operating Hour"
+                    android:textSize="8dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+        </HorizontalScrollView>
 
         <TextView
             android:id="@+id/sortTextView"
@@ -104,53 +190,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.115" />
 
-        <Button
-            android:id="@+id/clearButton"
-            android:layout_width="40dp"
-            android:layout_height="36dp"
-            android:background="@drawable/custom_background"
-            android:backgroundTint="@color/white"
-            android:text="X"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.859"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.105" />
-
-        <ToggleButton
-            android:id="@+id/sortASButton"
-            android:layout_width="98dp"
-            android:layout_height="36dp"
-            android:background="@drawable/custom_background"
-            android:backgroundTint="@color/white"
-            android:textOff="Available Spot"
-            android:textOn="Available Spot"
-            android:textSize="8dp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.674"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.105" />
-
-        <Spinner
-            android:id="@+id/sortDistanceButton"
-            android:layout_width="98dp"
-            android:layout_height="36dp"
-            android:background="@drawable/custom_background"
-            android:entries="@array/string"
-            android:popupBackground="@drawable/custom_background"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.325"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.105" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -36,6 +37,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -53,8 +56,11 @@ import com.team19.smartpark.adapters.filterListAdapter;
 import com.team19.smartpark.models.Parking;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -80,12 +86,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ListView filterListView;
     private LinearLayoutManager llm;
     private Button nearbyButton, clearButton;
-    private ToggleButton sASButton;
+    private ToggleButton sASButton,sFeesButton,openButton;
     private Spinner sDistanceButton;
     private TextView textView;
     private LatLng cameraLatLng;
     private BottomSheetBehavior mbottomSheetBehavior;
     private int spinnerPosition;
+    private HorizontalScrollView horizontalScrollView;
+    private Circle myCircle;
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
     private boolean locationPermissionGranted;
@@ -376,6 +384,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void filterUISetup(){
+        horizontalScrollView = findViewById(R.id.scrollViewFilter);
         linearLayout = (LinearLayout) findViewById(R.id.bottomSheet);
         filterListView = (ListView) findViewById(R.id.filterListView);
         mbottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
@@ -384,6 +393,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sDistanceButton = findViewById(R.id.sortDistanceButton);
         sASButton = findViewById(R.id.sortASButton);
         clearButton = findViewById(R.id.clearButton);
+        openButton = findViewById(R.id.openButton);
+        sFeesButton = findViewById(R.id.sortFeesButton);
         updateFilterUI(false);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.string, R.layout.spinner_custom_drop_down_menu);
         adapter.setDropDownViewResource(R.layout.spinner_custom_drop_down_menu);
@@ -392,8 +403,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sASButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!sASButton.isChecked() && spinnerPosition == 0) {
+                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
                 else if(!sASButton.isChecked()){
@@ -402,6 +415,46 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 else{
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                    sortAlgorithm();
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+            }
+        });
+        openButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked()) {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+                else if(!openButton.isChecked()){
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sortAlgorithm();
+                }
+                else{
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                    sortAlgorithm();
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+            }
+        });
+        sFeesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+                else if(!sFeesButton.isChecked()){
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sortAlgorithm();
+                }
+                else{
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
                     sortAlgorithm();
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
@@ -416,6 +469,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(myCircle!= null) {
+                    myCircle.remove();
+                    myCircle = null;
+                }
                 updateFilterUI(false);
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
                 sDistanceButton.setSelection(0);
@@ -431,7 +488,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             sortAlgorithm();
             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
-        else if(position == 0 && !sASButton.isChecked()){
+        else if(position == 0 && !sASButton.isChecked() && !sFeesButton.isChecked() && !openButton.isChecked()){
+            if(myCircle!= null) {
+                myCircle.remove();
+                myCircle = null;
+            }
             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
@@ -443,49 +504,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void updateFilterUI(Boolean state){
         if(state){
             nearbyButton.setVisibility(View.GONE);
-            sDistanceButton.setVisibility(View.VISIBLE);
-            sASButton.setVisibility(View.VISIBLE);
-            textView.setVisibility(View.VISIBLE);
+            horizontalScrollView.setVisibility(View.VISIBLE);
             clearButton.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.VISIBLE);
             linearLayout.setVisibility(View.VISIBLE);
 
         }
         else{
             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             nearbyButton.setVisibility(View.VISIBLE);
-            sDistanceButton.setVisibility(View.GONE);
-            sASButton.setVisibility(View.GONE);
-            textView.setVisibility(View.GONE);
+            horizontalScrollView.setVisibility(View.GONE);
             clearButton.setVisibility(View.GONE);
+            textView.setVisibility(View.GONE);
             linearLayout.setVisibility(View.GONE);
             sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
             sASButton.setChecked(false);
+            openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+            openButton.setChecked(false);
+            sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+            sFeesButton.setChecked(false);
         }
     }
     private void sortAlgorithm() {
         //Create two float to store distance between two locations
         float result1[] = new float[1];
         float result2[] = new float[1];
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("kk:mm");
+        String currentTime = simpleDateFormat.format(calendar.getTime());
+        float currentHour = Float.valueOf(currentTime.substring(0,currentTime.indexOf(":")))+Float.valueOf(currentTime.substring(currentTime.indexOf(":")+1,currentTime.length()))/60;
         int radius;
             switch (spinnerPosition) {
                 case 1:
                     radius = 100;
                     break;
                 case 2:
-                    radius = 250;
+                    radius = 200;
                     break;
                 case 3:
-                    radius = 500;
+                    radius = 300;
                     break;
                 case 4:
-                    radius = 1000;
+                    radius = 400;
                     break;
                 case 5:
-                    radius = 2000;
+                    radius = 500;
                     break;
                 default:
-                    if(sASButton.isChecked()){
-                        radius = 2000;
+                    if(sASButton.isChecked() || openButton.isChecked() || sFeesButton.isChecked()){
+                        radius = 150;
                     }
                     else {
                         radius = 0;
@@ -502,38 +569,64 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 filter.add(parkingSet.getValue());
             }
         }
+        Log.i("My Circle State", String.valueOf(myCircle));
+        if(myCircle != null){
+            myCircle.remove();
+            myCircle = null;
+        }
+            CircleOptions circleOptions = new CircleOptions()
+                    .center(cameraLatLng)   //set center
+                    .radius(radius)   //set radius in meters
+                    .fillColor(Color.argb(150, 235, 236, 246))  //default
+                    .strokeColor(Color.BLUE)
+                    .strokeWidth(5);
+            myCircle = mMap.addCircle(circleOptions);
         // Bubble Sorting
             for (int i = 0; i < filter.size(); i++) {
                 for (int j = i + 1; j < filter.size(); j++) {
-                    //Sort by Distance
-                    if (!sASButton.isChecked() && spinnerPosition > 0) {
+                    float spot1 = 0;
+                    float spot2 = 0;
+                    double fee1 = 0;
+                    double fee2 = 0;
+                    float operatingHour1 = 0;
+                    float operatingHour2 = 0;
+                    if(sASButton.isChecked()){
+                        spot1 = Collections.frequency(filter.get(i).spots.values(), true)/filter.get(i).spots.size();
+                        spot2 = Collections.frequency(filter.get(j).spots.values(), true)/filter.get(j).spots.size();
+                    }
+                    else{
+                        spot1 = 0;
+                        spot2 = 0;
+                    }
+                    if(sFeesButton.isChecked()){
+                        fee1 = filter.get(i).fees;
+                        fee2 = filter.get(j).fees;
+                    }
+                    if(openButton.isChecked()){
+                        String a = filter.get(i).operatingHour;
+                        String b = filter.get(j).operatingHour;
+                        float ch1 = Float.valueOf(a.substring(a.indexOf("-")+1,a.indexOf(":",a.indexOf("-"))))+Float.valueOf(a.substring(a.indexOf(":",a.indexOf("-"))+1,a.length()))/60;
+                        float ch2 = Float.valueOf(b.substring(b.indexOf("-")+1,b.indexOf(":",b.indexOf("-"))))+Float.valueOf(b.substring(b.indexOf(":",b.indexOf("-"))+1,b.length()))/60;
+                        operatingHour1 = (ch1-currentHour)/currentHour;
+                        operatingHour2 = (ch2-currentHour)/currentHour;
+                        Log.i("Spot1 Hour: ", String.valueOf(operatingHour1));
+                        Log.i("Spot2 Hour: ", String.valueOf(operatingHour2));
+                    }
+                    if(spinnerPosition>0){
                         Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
                         Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
-                        if (result1[0] > result2[0]) {
-                            Collections.swap(filter, j, i);
-                        }
                     }
-                    //Sort by Available Spots
-                    else if (sASButton.isChecked() && spinnerPosition == 0) {
-                        if(Collections.frequency(filter.get(i).spots.values(), true) < Collections.frequency(filter.get(j).spots.values(), true)){
-                            Collections.swap(filter, i, j);
-                        }
+                    else{
+                        result1[0] = 0;
+                        result2[0] = 0;
                     }
-                    //Sort by Distance and Available Spots
-                    else if(sASButton.isChecked() && spinnerPosition > 0){
-                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
-                        float spot1 = Collections.frequency(filter.get(i).spots.values(), true)/filter.get(i).spots.size();
-                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
-                        float spot2 = Collections.frequency(filter.get(j).spots.values(), true)/filter.get(j).spots.size();
-                        float score1 = (float) (0.8*(1-result1[0]/2000) + 0.2*spot1);
-                        float score2 = (float) (0.8*(1-result2[0]/2000) + 0.2*spot2);
+                        float score1 = (float) (0.7*(result1[0]/2000) + 0.1*spot1 + 0.1*(1-operatingHour1) + 0.1*(fee1));
+                        float score2 = (float) (0.7*(result2[0]/2000) + 0.1*spot2 + 0.1*(1-operatingHour2)+ 0.1*(fee2));
                         if(score1>score2){
                             Collections.swap(filter,j,i);
                         }
                     }
-
                 }
-            }
         //Get the distance information of the sorted parking array list
         for (int i = 0; i < filter.size(); i++) {
             Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
