@@ -69,7 +69,7 @@ public class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.
             }
             total = available + unavailable;
         }
-        holder.parkingStatus.setText(available + "/" + total + " available");
+        holder.parkingStatus.setText(unavailable + "/" + total + " Occupied");
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
