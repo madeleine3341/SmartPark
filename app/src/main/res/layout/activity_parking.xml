@@ -6,121 +6,114 @@
     android:layout_height="match_parent"
     tools:context=".AddParkingActivity">
 
-    <TextView
-        android:id="@+id/openTextView"
-        android:layout_width="100dp"
-        android:layout_height="65dp"
-        android:autofillHints=""
-        android:ems="10"
-        android:gravity="center_vertical"
-        android:hint="Select Opening Hour"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.32"/>
-
-    <ImageButton
-        android:id="@+id/selectionLocationbtn"
-        android:layout_width="33dp"
-        android:layout_height="33dp"
-        android:layout_marginBottom="53dp"
-        app:layout_constraintBottom_toTopOf="@+id/saveBtn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.149" />
-        app:layout_constraintTop_toBottomOf="@+id/spotsTextView"
-        app:srcCompat="@android:drawable/ic_dialog_map" />
-
-    <TextView
-    android:id="@+id/closeTextView"
-    android:layout_width="100dp"
-    android:layout_height="65dp"
-    android:autofillHints=""
-    android:ems="10"
-    android:gravity="center_vertical"
-    android:hint="Select Closing Hour"
-    android:textSize="18sp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.676"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintVertical_bias="0.149" />
-
     <EditText
         android:id="@+id/nameTextView"
-        android:layout_width="220dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="99dp"
-        android:layout_marginBottom="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="140dp"
+        android:layout_marginBottom="8dp"
         android:autofillHints=""
         android:ems="10"
-        android:gravity="center_vertical"
-        android:hint="Select Closing Hour"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.676"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.149" />
-
-
-    <EditText
-        android:id="@+id/spotsTextView"
-        android:layout_width="220dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="23dp"
-        android:autofillHints=""
-        android:ems="10"
-        android:hint="Spots"
-        app:layout_constraintBottom_toTopOf="@+id/selectionLocationbtn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/feesTextView" />
+        android:hint="Parking name"
+        app:layout_constraintBottom_toTopOf="@+id/openTextView"
+        app:layout_constraintStart_toStartOf="@+id/openTextView"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/feesTextView"
-        android:layout_width="220dp"
-        android:layout_height="0dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="18dp"
         android:autofillHints=""
         android:ems="10"
         android:hint="Fees"
-        app:layout_constraintBottom_toTopOf="@+id/spotsTextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/selectionLocationbtn"
+        app:layout_constraintStart_toStartOf="@+id/spotsTextView"
+        app:layout_constraintTop_toBottomOf="@+id/spotsTextView" />
+
+    <EditText
+        android:id="@+id/spotsTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:hint="Spots"
+        app:layout_constraintBottom_toTopOf="@+id/feesTextView"
+        app:layout_constraintStart_toStartOf="@+id/addressTextView"
         app:layout_constraintTop_toBottomOf="@+id/addressTextView" />
 
     <EditText
         android:id="@+id/addressTextView"
-        android:layout_width="220dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="18dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="382dp"
         android:ems="10"
         android:hint="Adress"
         android:importantForAutofill="no"
-
-        app:layout_constraintBottom_toTopOf="@+id/feesTextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/nameTextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/openTextView"
+        app:layout_constraintTop_toBottomOf="@+id/closeTextView"
         tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/saveBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="200dp"
+        android:layout_marginBottom="131dp"
         android:text="Save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/selectionLocationbtn"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.612"
         tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/openTextView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="98dp"
+        android:layout_marginEnd="13dp"
+        android:layout_marginBottom="12dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:gravity="center_vertical"
+        android:hint="Opening Hour"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/addressTextView"
+        app:layout_constraintEnd_toStartOf="@+id/closeTextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/nameTextView" />
+
+    <TextView
+        android:id="@+id/closeTextView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="193dp"
+        android:layout_marginEnd="102dp"
+        android:layout_marginBottom="12dp"
+        android:autofillHints=""
+        android:ems="10"
+        android:gravity="center_vertical"
+        android:hint="Closing Hour"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/addressTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/openTextView"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/selectionLocationbtn"
+        android:layout_width="47dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginEnd="80dp"
+        android:layout_marginBottom="40dp"
+        app:layout_constraintBottom_toTopOf="@+id/saveBtn"
+        app:layout_constraintEnd_toEndOf="@+id/feesTextView"
+        app:layout_constraintStart_toStartOf="@+id/nameTextView"
+        app:layout_constraintTop_toBottomOf="@+id/feesTextView"
+        app:srcCompat="@android:drawable/ic_dialog_map" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
