@@ -36,6 +36,8 @@ public class filterListAdapter extends ArrayAdapter<String> {
     private ArrayList<Parking> parkingInfo = new ArrayList<Parking>();
     private ArrayList<String> fdistance = new ArrayList<String>();
     private ArrayList<String> avSpots = new ArrayList<String>();
+    private ArrayList<String> recommnenedspot = new ArrayList<String>();
+
     private ArrayList<String> SPOTS = new ArrayList<String>();
     private Button directions;
     private Button showspotslist;
@@ -53,9 +55,12 @@ public class filterListAdapter extends ArrayAdapter<String> {
             for(Map.Entry<String,Boolean> key: parkingInfo.get(i).spots.entrySet()){
                 if(key.getValue()){
                     avs = avs + key.getKey() + "\n";
+//                    recommnenedspot.add(avs);
                 }
             }
             avSpots.add(avs);
+            recommnenedspot.add(avSpots.get(0));
+
         }
     }
     public int getCount() {
@@ -85,12 +90,10 @@ public class filterListAdapter extends ArrayAdapter<String> {
 
         TextView name = (TextView) convertView.findViewById(R.id.nameFilterTextView);
         TextView address = (TextView) convertView.findViewById(R.id.addressFilterTextView);
-        TextView status = (TextView) convertView.findViewById(R.id.statusFilterTextView);
         TextView distance = (TextView) convertView.findViewById(R.id.distanceTextView2);
         TextView fees = (TextView) convertView.findViewById(R.id.FeesFilterTextView);
         TextView textView1 = (TextView) convertView.findViewById(R.id.distanceTextView);
-        TextView availablespots = (TextView) convertView.findViewById(R.id.availableSpotTextView2);
-        TextView numberavailablespots = (TextView) convertView.findViewById(R.id.availableSpotTextView);
+        TextView operatingHours=(TextView) convertView.findViewById(R.id.OperatingHours);
         showspotslist= (Button) convertView.findViewById(R.id.availableSpotsList);
 
 
@@ -98,20 +101,14 @@ public class filterListAdapter extends ArrayAdapter<String> {
             name.setText(parkingInfo.get(position).name);
             address.setText(parkingInfo.get(position).address);
             fees.setText("Fees: " + Double.toString(parkingInfo.get(position).fees) + "$");
-
-            status.setText("Status: ");
+            operatingHours.setText("Operating Hours: "+parkingInfo.get(position).getOperatingHour());
             distance.setText(fdistance.get(position) + " m");
-            availablespots.setText(avSpots.get(0));
-
-            distance.setText(fdistance.get(position) + " m");
-            numberavailablespots.setText(avSpots.size() + " available spots");
         }
 
         showspotslist.setOnClickListener(new View.OnClickListener() {
         //fragementlist
             @Override
             public void onClick(View v) {
-//
                 SPOTS.clear();
                 if(parkingInfo.size() > 0 && Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
                     SPOTS.add(avSpots.get(position));
@@ -126,25 +123,17 @@ public class filterListAdapter extends ArrayAdapter<String> {
 
             }
         });
-        TextView textView2 = (TextView) convertView.findViewById(R.id.availableSpotTextView);
         TextView noResult = (TextView) convertView.findViewById(R.id.noResultTextView);
         if(parkingInfo.size() > 0 && Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
             name.setText(parkingInfo.get(position).name);
             address.setText(parkingInfo.get(position).address);
-            String stat = null;
-            stat = "Available";
-            status.setText("Status: " + stat);
             distance.setText(fdistance.get(position) + " m");
-            availablespots.setText(avSpots.get(position));
         }
         else{
             name.setText("");
             address.setText("");
-            status.setText("");
             distance.setText("");
-            availablespots.setText("");
             textView1.setText("");
-            textView2.setText("");
             noResult.setText("No Available Parking Lot");
         }
         return convertView;

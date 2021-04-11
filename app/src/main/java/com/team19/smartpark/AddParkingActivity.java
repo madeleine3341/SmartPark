@@ -46,7 +46,6 @@ public class AddParkingActivity extends AppCompatActivity {
 
     private int t1Hour,t1Minute,t2Hour,t2Minute;
     private boolean t1State,t2State;
-    private EditText feesTextView;
 
     private FloatingActionButton actionBtn;
 
@@ -104,8 +103,8 @@ public class AddParkingActivity extends AppCompatActivity {
                 strSpots = strSpots.replace(" ", "");
                 String[] spots = strSpots.split(",");
                 String operatingHour = t1Hour + ":" +t1Minute +"-"+t2Hour+":"+t2Minute;
-                String fee=feesTextView.getText().toString();
-                double fees = Double.parseDouble(fee);
+                String feee=feesTextView.getText().toString();
+                double feees = Double.parseDouble(feee);
                 HashMap<String, Boolean> hashspot = new HashMap<>();
                 for (String spot :
                         spots) {

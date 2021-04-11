@@ -148,9 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             textView.setTextColor(Color.BLACK);
 
 
-        } catch (NullPointerException ignore) {
-
-        }
+        } catch (NullPointerException ignore) { }
         searchView.onWindowFocusChanged(false);
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
@@ -209,7 +207,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return false;
             }
         });
-
     }
 
 
@@ -433,39 +430,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sASButton = findViewById(R.id.sortASButton);
         clearButton = findViewById(R.id.clearButton);
         openButton = findViewById(R.id.openButton);
-        sFeesButton = findViewById(R.id.sortFeesButton);
         updateFilterUI(false);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.string, R.layout.spinner_custom_drop_down_menu);
         adapter.setDropDownViewResource(R.layout.spinner_custom_drop_down_menu);
         sDistanceButton.setAdapter(adapter);
         sDistanceButton.setOnItemSelectedListener(this);
         sASButton.setOnClickListener(new View.OnClickListener() {
-
-        sFeesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!sDistanceButton.isChecked() && !sASButton.isChecked() && sFeesButton.isChecked()) {
-                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-                else if (!sASButton.isChecked()&&!sDistanceButton.isChecked()) {
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                } else if (!sASButton.isChecked()) {
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                } else if (!sDistanceButton.isChecked()) {
-                    sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                } else {
-                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235, 236, 246)));
-                    sortAlgorithm();
-                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                }
-            }
+                                         @Override
+                                         public void onClick(View v) {  if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
+                                             sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                                             openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                                             sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                                             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                                         }
+                                         else if(!sASButton.isChecked()){
+                                             sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                                             sortAlgorithm();
+                                         }
+                                         else{
+                                             sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                                             sortAlgorithm();
+                                             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                                         }}
         });
-
-        sDistanceButton.setOnClickListener(new View.OnClickListener() {
+        sFeesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
@@ -474,17 +462,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 }
-                else if(!sASButton.isChecked()){
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                else if(!sFeesButton.isChecked()){
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sortAlgorithm();
                 }
                 else{
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
                     sortAlgorithm();
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
             }
         });
+
         openButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -505,19 +494,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
-        sFeesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-                }
-                else{
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
-                    sortAlgorithm();
-                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                }
-            }
-        });
+//        sFeesButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
+//                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+//                }
+//                else{
+//                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+//                    sortAlgorithm();
+//                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+//                }
+//            }
+//        });
         nearbyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -563,25 +552,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void updateFilterUI(Boolean state) {
         if (state) {
             nearbyButton.setVisibility(View.GONE);
-            sDistanceButton.setVisibility(View.VISIBLE);
-            sASButton.setVisibility(View.VISIBLE);
-            sFeesButton.setVisibility(View.VISIBLE);
-            textView.setVisibility(View.VISIBLE);
             horizontalScrollView.setVisibility(View.VISIBLE);
             clearButton.setVisibility(View.VISIBLE);
             textView.setVisibility(View.VISIBLE);
             linearLayout.setVisibility(View.VISIBLE);
 
-        } else {
         }
         else{
             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             nearbyButton.setVisibility(View.VISIBLE);
             horizontalScrollView.setVisibility(View.GONE);
-            sDistanceButton.setVisibility(View.GONE);
-            sASButton.setVisibility(View.GONE);
-            sFeesButton.setVisibility(View.GONE);
-            textView.setVisibility(View.GONE);
             clearButton.setVisibility(View.GONE);
             textView.setVisibility(View.GONE);
             linearLayout.setVisibility(View.GONE);
@@ -591,11 +571,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             openButton.setChecked(false);
             sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
             sFeesButton.setChecked(false);
-            sDistanceButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-            sDistanceButton.setChecked(false);
-            sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-            sFeesButton.setChecked(false);
-            mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
     }
     private void sortAlgorithm() {
