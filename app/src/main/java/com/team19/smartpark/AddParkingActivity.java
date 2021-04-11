@@ -1,19 +1,21 @@
 package com.team19.smartpark;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.team19.smartpark.models.FirebaseHelper;
 import com.team19.smartpark.models.Parking;
 
 import java.util.HashMap;
-import java.util.TreeMap;
 
 public class AddParkingActivity extends AppCompatActivity {
 
@@ -21,12 +23,13 @@ public class AddParkingActivity extends AppCompatActivity {
     private Button saveBtn;
     private EditText nameTextView;
     private EditText addressTextView;
-    private EditText latTextView;
-    private EditText lngTextView;
     private EditText spotsTextView;
+    private ImageButton selectLocationBtn;
     private EditText feesTextView;
 
     private FloatingActionButton actionBtn;
+    private LatLng parkingLocation;
+    private boolean locationSelected = false;
 
 
     @Override
@@ -37,9 +40,14 @@ public class AddParkingActivity extends AppCompatActivity {
         saveBtn = findViewById(R.id.saveBtn);
         nameTextView = findViewById(R.id.nameTextView);
         addressTextView = findViewById(R.id.addressTextView);
-        latTextView = findViewById(R.id.latTextView);
-        lngTextView = findViewById(R.id.lngTextView);
         spotsTextView = findViewById(R.id.spotsTextView);
+        selectLocationBtn = findViewById(R.id.selectionLocationbtn);
+        selectLocationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new SelectionLocationMapFragment().show(getSupportFragmentManager(), null);
+            }
+        });
         feesTextView =findViewById(R.id.feesTextView);
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
@@ -61,24 +69,12 @@ public class AddParkingActivity extends AppCompatActivity {
                 }
 
 
-                double lat = 0.0;
-                double lng = 0.0;
-                try {
-                    lat = Double.parseDouble(latTextView.getText().toString());
-                    lng = Double.parseDouble(lngTextView.getText().toString());
-
-                } catch (NumberFormatException ignored) {
-
-                }
-
-                if (!name.isEmpty() && !address.isEmpty() && lat != 0.0 && lng != 0.0 && !fee.isEmpty()) {
+                if (!name.isEmpty() && !address.isEmpty() && locationSelected) {
                     Parking parking = new Parking();
                     parking.address = address;
-                    parking.lat = lat;
-                    parking.lng = lng;
                     parking.name = name;
                     parking.spots = hashspot;
-                    parking.fees=fees;
+                    parking.setLatLng(parkingLocation);
                     FirebaseHelper.addParkingLots(parking);
                     Toast.makeText(getApplicationContext(), "Parking added successfully", Toast.LENGTH_SHORT).show();
                     finish();
@@ -87,5 +83,10 @@ public class AddParkingActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    public void setParkingLocation(LatLng latLng) {
+        parkingLocation = latLng;
+        locationSelected = true;
     }
 }
