@@ -1,23 +1,40 @@
 package com.team19.smartpark;
 
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -25,39 +42,63 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.team19.smartpark.adapters.filterListAdapter;
 import com.team19.smartpark.models.Parking;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, AdapterView.OnItemSelectedListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int DEFAULT_ZOOM = 15;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private final Map<String, Marker> mMarkerMap = new HashMap<>();
+    private LinkedHashMap<String, Parking> parkingsList = new LinkedHashMap<String, Parking>();
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
     private DatabaseReference mDatabase;
     private GoogleMap mMap;
     private SearchView searchView;
+    private ImageView closeButton;
+
+    private Context context;
+    private LinearLayout linearLayout;
+    private ListView filterListView;
+    private LinearLayoutManager llm;
+    private Button nearbyButton, clearButton;
+    private ToggleButton sASButton,sFeesButton,openButton;
+    private Spinner sDistanceButton;
+    private TextView textView;
+    private LatLng cameraLatLng;
+    private BottomSheetBehavior mbottomSheetBehavior;
+    private int spinnerPosition;
+    private HorizontalScrollView horizontalScrollView;
+    private Circle myCircle;
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
     private boolean locationPermissionGranted;
@@ -67,6 +108,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //ArrayList to hold all parking objects
     private LinkedHashMap<String, Parking> parkings;
     private FloatingActionButton fab;
+    private FloatingActionButton myLocationButton;
 
 
     @Override
@@ -82,7 +124,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Construct a FusedLocationProviderClient.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        filterUISetup();
         fab = findViewById(R.id.floatingActionButton);
+        myLocationButton = findViewById(R.id.myLocationButton);
+        myLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LatLng latLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+            }
+        });
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,10 +147,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             TextView textView = searchView.findViewById(id);
             textView.setTextColor(Color.BLACK);
 
-        } catch (NullPointerException ignore) {
 
-        }
+        } catch (NullPointerException ignore) { }
         searchView.onWindowFocusChanged(false);
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateFilterUI(false);
+                nearbyButton.setVisibility(View.GONE);
+            }
+        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                cameraLatLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
+                updateFilterUI(false);
+                return false;
+            }
+        });
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -120,7 +185,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     }
                     if (address != null) {
+                        nearbyButton.setVisibility(View.VISIBLE);
                         LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                        //    double lat=address.getLatitude();
+                        //   double lon=address.getLongitude();
+
+                        cameraLatLng = latLng;
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
                     } else {
                         Toast.makeText(getApplicationContext(), "Adress not found", Toast.LENGTH_SHORT).show();
@@ -132,11 +202,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                updateFilterUI(false);
+                nearbyButton.setVisibility(View.GONE);
                 return false;
             }
         });
+    }
+
+
+    //send to google map show directions
+        public void DisplayTrack(String destination) {
+            getDeviceLocation();
+            Double la=lastKnownLocation.getLatitude();
+            Double lo=lastKnownLocation.getLongitude();
+
+
+        try {
+            Uri uri = Uri.parse("https://www.google.co.in/maps/dir/" + la +","+ lo + "/" + destination);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.google.android.apps.maps");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+
+
+        } catch (ActivityNotFoundException e) {
+            Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.maps");
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
 
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -173,7 +270,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 Iterable<DataSnapshot> parkings = dataSnapshot.getChildren();
                 //array list to hold all parking lots
-                LinkedHashMap<String, Parking> parkingsList = new LinkedHashMap<String, Parking>();
                 for (DataSnapshot parking :
                         parkings) {
                     parking.getKey();
@@ -297,10 +393,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
                             lastKnownLocation = task.getResult();
+//                            double lat = lastKnownLocation.getLatitude();
+//                            double lon = lastKnownLocation.getLongitude();
+
                             if (lastKnownLocation != null) {
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(lastKnownLocation.getLatitude(),
                                                 lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                cameraLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
+
                             }
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
@@ -315,6 +416,277 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage(), e);
         }
+    }
+
+    private void filterUISetup(){
+        horizontalScrollView = findViewById(R.id.scrollViewFilter);
+        linearLayout = (LinearLayout) findViewById(R.id.bottomSheet);
+        filterListView = (ListView) findViewById(R.id.filterListView);
+        mbottomSheetBehavior = BottomSheetBehavior.from(linearLayout);
+        nearbyButton = findViewById(R.id.nearbyButton);
+        textView = findViewById(R.id.sortTextView);
+        sDistanceButton = findViewById(R.id.sortDistanceButton);
+        sFeesButton = findViewById(R.id.sortFeesButton);
+        sASButton = findViewById(R.id.sortASButton);
+        clearButton = findViewById(R.id.clearButton);
+        openButton = findViewById(R.id.openButton);
+        updateFilterUI(false);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.string, R.layout.spinner_custom_drop_down_menu);
+        adapter.setDropDownViewResource(R.layout.spinner_custom_drop_down_menu);
+        sDistanceButton.setAdapter(adapter);
+        sDistanceButton.setOnItemSelectedListener(this);
+        sASButton.setOnClickListener(new View.OnClickListener() {
+                                         @Override
+                                         public void onClick(View v) {  if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
+                                             sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                                             openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                                             sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                                             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                                         }
+                                         else if(!sASButton.isChecked()){
+                                             sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                                             sortAlgorithm();
+                                         }
+                                         else{
+                                             sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                                             sortAlgorithm();
+                                             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                                         }}
+        });
+        sFeesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+                else if(!sFeesButton.isChecked()){
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sortAlgorithm();
+                }
+                else{
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                    sortAlgorithm();
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+            }
+        });
+
+        openButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked()) {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+                else if(!openButton.isChecked()){
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+                    sortAlgorithm();
+                }
+                else{
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                    sortAlgorithm();
+                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+            }
+        });
+//        sFeesButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
+//                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+//                }
+//                else{
+//                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+//                    sortAlgorithm();
+//                    mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+//                }
+//            }
+//        });
+        nearbyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateFilterUI(true);
+            }
+        });
+        clearButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(myCircle!= null) {
+                    myCircle.remove();
+                    myCircle = null;
+                }
+                updateFilterUI(false);
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+                sDistanceButton.setSelection(0);
+            }
+        });
+    }
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        spinnerPosition = position;
+        if(parent.getItemAtPosition(position) != null && position != 0) {
+            String text = parent.getItemAtPosition(position).toString();
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+            sortAlgorithm();
+            mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
+        else if(position == 0 && !sASButton.isChecked() && !sFeesButton.isChecked() && !openButton.isChecked()){
+            if(myCircle!= null) {
+                myCircle.remove();
+                myCircle = null;
+            }
+            mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    private void updateFilterUI(Boolean state) {
+        if (state) {
+            nearbyButton.setVisibility(View.GONE);
+            horizontalScrollView.setVisibility(View.VISIBLE);
+            clearButton.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.VISIBLE);
+            linearLayout.setVisibility(View.VISIBLE);
+
+        }
+        else{
+            mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            nearbyButton.setVisibility(View.VISIBLE);
+            horizontalScrollView.setVisibility(View.GONE);
+            clearButton.setVisibility(View.GONE);
+            textView.setVisibility(View.GONE);
+            linearLayout.setVisibility(View.GONE);
+            sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+            sASButton.setChecked(false);
+            openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+            openButton.setChecked(false);
+            sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+            sFeesButton.setChecked(false);
+        }
+    }
+    private void sortAlgorithm() {
+        //Create two float to store distance between two locations
+        float result1[] = new float[1];
+        float result2[] = new float[1];
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("kk:mm");
+        String currentTime = simpleDateFormat.format(calendar.getTime());
+        float currentHour = Float.valueOf(currentTime.substring(0,currentTime.indexOf(":")))+Float.valueOf(currentTime.substring(currentTime.indexOf(":")+1,currentTime.length()))/60;
+        int radius;
+            switch (spinnerPosition) {
+                case 1:
+                    radius = 100;
+                    break;
+                case 2:
+                    radius = 200;
+                    break;
+                case 3:
+                    radius = 300;
+                    break;
+                case 4:
+                    radius = 400;
+                    break;
+                case 5:
+                    radius = 500;
+                    break;
+                default:
+                    if(sASButton.isChecked() || openButton.isChecked() || sFeesButton.isChecked()){
+                        radius = 150;
+                    }
+                    else {
+                        radius = 0;
+                    }
+                    break;
+            }
+        //Create an ArrayList of Parking object
+
+        ArrayList<Parking> filter = new ArrayList<Parking>();
+        ArrayList<String> distance = new ArrayList<String>();
+
+        for (Map.Entry<String, Parking> parkingSet : parkingsList.entrySet()) {
+            Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, parkingSet.getValue().lat, parkingSet.getValue().lng, result1);
+            if(result1[0] < radius){
+                filter.add(parkingSet.getValue());
+            }
+        }
+        Log.i("My Circle State", String.valueOf(myCircle));
+        if(myCircle != null){
+            myCircle.remove();
+            myCircle = null;
+        }
+            CircleOptions circleOptions = new CircleOptions()
+                    .center(cameraLatLng)   //set center
+                    .radius(radius)   //set radius in meters
+                    .fillColor(Color.argb(150, 235, 236, 246))  //default
+                    .strokeColor(Color.BLUE)
+                    .strokeWidth(5);
+            myCircle = mMap.addCircle(circleOptions);
+        // Bubble Sorting
+            for (int i = 0; i < filter.size(); i++) {
+                for (int j = i + 1; j < filter.size(); j++) {
+                    float spot1 = 0;
+                    float spot2 = 0;
+                    double fee1 = 0;
+                    double fee2 = 0;
+                    float operatingHour1 = 0;
+                    float operatingHour2 = 0;
+                    if(sASButton.isChecked()){
+                        spot1 = Collections.frequency(filter.get(i).spots.values(), true)/filter.get(i).spots.size();
+                        spot2 = Collections.frequency(filter.get(j).spots.values(), true)/filter.get(j).spots.size();
+                    }
+                    else{
+                        spot1 = 0;
+                        spot2 = 0;
+                    }
+                    if(sFeesButton.isChecked()){
+                        fee1 = filter.get(i).fees;
+                        fee2 = filter.get(j).fees;
+                    }
+                    if(openButton.isChecked()){
+                        String a = filter.get(i).operatingHour;
+                        String b = filter.get(j).operatingHour;
+                        float ch1 = Float.valueOf(a.substring(a.indexOf("-")+1,a.indexOf(":",a.indexOf("-"))))+Float.valueOf(a.substring(a.indexOf(":",a.indexOf("-"))+1,a.length()))/60;
+                        float ch2 = Float.valueOf(b.substring(b.indexOf("-")+1,b.indexOf(":",b.indexOf("-"))))+Float.valueOf(b.substring(b.indexOf(":",b.indexOf("-"))+1,b.length()))/60;
+                        operatingHour1 = (ch1-currentHour)/currentHour;
+                        operatingHour2 = (ch2-currentHour)/currentHour;
+                        Log.i("Spot1 Hour: ", String.valueOf(operatingHour1));
+                        Log.i("Spot2 Hour: ", String.valueOf(operatingHour2));
+                    }
+                    if(spinnerPosition>0){
+                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
+                        Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
+                    }
+                    else{
+                        result1[0] = 0;
+                        result2[0] = 0;
+                    }
+                        float score1 = (float) (0.7*(result1[0]/2000) + 0.1*spot1 + 0.1*(1-operatingHour1) + 0.1*(fee1));
+                        float score2 = (float) (0.7*(result2[0]/2000) + 0.1*spot2 + 0.1*(1-operatingHour2)+ 0.1*(fee2));
+                        if(score1>score2){
+                            Collections.swap(filter,j,i);
+                        }
+                    }
+                }
+        //Get the distance information of the sorted parking array list
+        for (int i = 0; i < filter.size(); i++) {
+            Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
+            distance.add(String.format("%.0f", result1[0]));
+        }
+        filterListAdapter adapter = new filterListAdapter(this, R.layout.adapter_bottom_sheet_list_view, filter, distance);
+        filterListView.setAdapter(adapter);
+    }
+
+    public void updateview(LatLng latLng) {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 20));
     }
 }
 

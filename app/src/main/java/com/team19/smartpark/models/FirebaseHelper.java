@@ -49,6 +49,7 @@ public class FirebaseHelper {
     public static void addParkingLots(Parking parking) {
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         mDatabase.push().setValue(parking);
+
     }
 
     public static void addParkingSpot(String parkingId, Map<String, Object> spots) {

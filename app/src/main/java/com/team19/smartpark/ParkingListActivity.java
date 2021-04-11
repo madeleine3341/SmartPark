@@ -40,6 +40,8 @@ public class ParkingListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parking_list);
         addParkingFAB = findViewById(R.id.addParkingfab);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         addParkingFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,8 +96,4 @@ public class ParkingListActivity extends AppCompatActivity {
         plist.setAdapter(adapter);
     }
 
-    private void goToParkingSpotsActivity() {
-        //Intent intent = new Intent(this, ParkingSpotsActivity.class);
-        //startActivity(intent);
-    }
 }

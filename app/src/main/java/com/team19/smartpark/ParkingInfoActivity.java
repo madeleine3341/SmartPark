@@ -66,6 +66,7 @@ public class ParkingInfoActivity  extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info_list);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         parkingID = getIntent().getStringExtra("reference");
 
