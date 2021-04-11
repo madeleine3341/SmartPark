@@ -55,12 +55,9 @@ public class filterListAdapter extends ArrayAdapter<String> {
             for(Map.Entry<String,Boolean> key: parkingInfo.get(i).spots.entrySet()){
                 if(key.getValue()){
                     avs = avs + key.getKey() + "\n";
-//                    recommnenedspot.add(avs);
                 }
             }
             avSpots.add(avs);
-            recommnenedspot.add(avSpots.get(0));
-
         }
     }
     public int getCount() {
@@ -92,7 +89,7 @@ public class filterListAdapter extends ArrayAdapter<String> {
         TextView address = (TextView) convertView.findViewById(R.id.addressFilterTextView);
         TextView distance = (TextView) convertView.findViewById(R.id.distanceTextView2);
         TextView fees = (TextView) convertView.findViewById(R.id.FeesFilterTextView);
-        TextView textView1 = (TextView) convertView.findViewById(R.id.distanceTextView);
+        TextView distanceINbetween = (TextView) convertView.findViewById(R.id.distanceTextView);
         TextView operatingHours=(TextView) convertView.findViewById(R.id.OperatingHours);
         showspotslist= (Button) convertView.findViewById(R.id.availableSpotsList);
 
@@ -133,7 +130,11 @@ public class filterListAdapter extends ArrayAdapter<String> {
             name.setText("");
             address.setText("");
             distance.setText("");
-            textView1.setText("");
+            distanceINbetween.setText("");
+            operatingHours.setText("");
+            fees.setText("");
+            showspotslist.setVisibility(View.GONE);
+            directions.setVisibility(View.GONE);
             noResult.setText("No Available Parking Lot");
         }
         return convertView;
