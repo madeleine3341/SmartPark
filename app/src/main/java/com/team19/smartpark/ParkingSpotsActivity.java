@@ -2,8 +2,11 @@ package com.team19.smartpark;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,12 +14,15 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.team19.smartpark.adapters.ParkingSpotAdapter;
+import com.team19.smartpark.models.FirebaseHelper;
 
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -26,7 +32,9 @@ public class ParkingSpotsActivity extends AppCompatActivity {
     RecyclerView parkingGrid;
     ParkingSpotAdapter adapter;
     GridLayoutManager gridLayoutManager;
-    DatabaseReference mDatabase;
+    private FirebaseAuth fAuth;
+    private Button removeParkingLotButton;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,13 +47,28 @@ public class ParkingSpotsActivity extends AppCompatActivity {
         parkingGrid.setLayoutManager(gridLayoutManager);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        removeParkingLotButton = findViewById(R.id.removeParkingLotButton);
+        removeParkingLotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseHelper.removeParkingLots(parkingPath);
+                startActivity(new Intent(getApplicationContext(),ParkingListActivity.class));
+                finish();
+            }
+        });
 
-        mDatabase = FirebaseDatabase.getInstance().getReference(parkingPath + "/spots"); //path to parking to be put here
-        mDatabase.orderByKey().addValueEventListener(new ValueEventListener() {
+
+        fAuth = FirebaseAuth.getInstance();
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid()+"/parkingLots/"+parkingPath+"/spots");
+        ref.orderByKey().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                TreeMap<String, Boolean> spots = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
-                loadList(spots, getSupportFragmentManager(), false);
+                //Log.i("Spots:", String.valueOf(snapshot.getValue()));
+                if(snapshot.getValue() != null) {
+                    TreeMap<String, Boolean> spots = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
+                    loadList(spots, getSupportFragmentManager(), false);
+                }
             }
 
             @Override
@@ -53,6 +76,7 @@ public class ParkingSpotsActivity extends AppCompatActivity {
 
             }
         });
+
 
     }
 
@@ -77,11 +101,16 @@ public class ParkingSpotsActivity extends AppCompatActivity {
             return true;
         } else if (item.getItemId() == R.id.action_removeParkingSpot) {
 //             If we got here, the user's action was not recognized.
-            mDatabase.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid()+"/parkingLots/"+parkingPath+"/spots");
+            ref.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    TreeMap<String, Boolean> spots = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
-                    loadList(spots, getSupportFragmentManager(), true);
+                    Log.i("snapshot value", String.valueOf(snapshot.getValue()));
+                    if(snapshot.getValue() != null) {
+                        TreeMap<String, Boolean> spots = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
+                        loadList(spots, getSupportFragmentManager(), true);
+                    }
                 }
 
                 @Override

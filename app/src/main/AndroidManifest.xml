@@ -21,22 +21,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartPark"
         android:usesCleartextTraffic="true">
-        <activity android:name=".MainActivity" />
-        <activity android:name=".ParkingListActivity"
-           android:parentActivityName=".MapsActivity"
-            ></activity>
-        <activity android:name=".AddParkingActivity"
-            android:parentActivityName=".ParkingListActivity"
-            ></activity>
-        <activity android:name=".LinkSensorActivity"
-            android:parentActivityName=".ParkingSpotsActivity"
-            ></activity>
-        <activity android:name=".ParkingSpotsActivity"
-            android:parentActivityName=".ParkingListActivity"
-            ></activity>
-        <activity android:name=".ParkingInfoActivity"
-            android:parentActivityName=".MapsActivity"
-            ></activity>
+        <activity android:name=".Register"
+            android:parentActivityName=".MapsActivity" />
+        <activity android:name=".LoginActivity"
+            android:parentActivityName=".Register" />
+        <activity android:name=".MainActivity"
+            android:parentActivityName=".MapsActivity" />
+        <activity
+            android:name=".ParkingListActivity"
+            android:parentActivityName=".MapsActivity" />
+        <activity
+            android:name=".AddParkingActivity"
+            android:parentActivityName=".ParkingListActivity" />
+        <activity
+            android:name=".LinkSensorActivity"
+            android:parentActivityName=".ParkingSpotsActivity" />
+        <activity
+            android:name=".ParkingSpotsActivity"
+            android:parentActivityName=".ParkingListActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -50,7 +52,7 @@
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="AIzaSyBrI0Eb9twtk9vFDfJ-jUor6w82NtMR5Vo" />
 
         <activity
             android:name=".MapsActivity"

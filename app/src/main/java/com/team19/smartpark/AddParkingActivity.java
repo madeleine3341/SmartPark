@@ -23,7 +23,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.team19.smartpark.models.FirebaseHelper;
 import com.team19.smartpark.models.Parking;
@@ -110,6 +110,9 @@ public class AddParkingActivity extends AppCompatActivity {
                 String strSpots = spotsTextView.getText().toString();
                 strSpots = strSpots.replace(" ", "");
                 String[] spots = strSpots.split(",");
+                for(int i = 0;i<spots.length;i++){
+                    spots[i] = "Id"+spots[i];
+                }
                 String operatingHour = t1Hour + ":" +t1Minute +"-"+t2Hour+":"+t2Minute;
                 String feee=feesTextView.getText().toString();
                 double feees = Double.parseDouble(feee);
@@ -211,12 +214,8 @@ public class AddParkingActivity extends AppCompatActivity {
         timePickerDialog.show();
     }
     private boolean timeSelectionGuard() {
-        if(t1Hour > t2Hour ) {
+        if (t1Hour > t2Hour) {
             return true;
-        }
-        else if(t1Hour == t2Hour && t1Minute >= t2Minute){
-            return true;
-        }
-        return false;
+        } else return t1Hour == t2Hour && t1Minute >= t2Minute;
     }
 }

@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,15 +48,20 @@ public class FirebaseHelper {
     }
 
     public static void addParkingLots(Parking parking) {
-        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
-        mDatabase.push().setValue(parking);
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid()+"/parkingLots").child(parking.name).setValue(parking);
 
     }
 
     public static void addParkingSpot(String parkingId, Map<String, Object> spots) {
-
-        FirebaseDatabase.getInstance().getReference(parkingId).child("spots").updateChildren(spots);
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid()+"/parkingLots/"+parkingId).child("spots").updateChildren(spots);
         Log.d("TAG", "addParkingSpot: ");
+
+    }
+    public static void removeParkingLots(String parkingLotId){
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid()+"/parkingLots/"+parkingLotId).removeValue();
 
     }
 }

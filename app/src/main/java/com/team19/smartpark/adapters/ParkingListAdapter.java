@@ -59,17 +59,19 @@ public class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.
         int total = 0, available = 0, unavailable = 0;
         boolean a = false;
         holder.parkingName.setText(mParkingListName.get(position));
-        for (Map.Entry<String, Boolean> entry : spots.get(position).entrySet()) {
-            a = entry.getValue();
+        if(spots.get(position) != null) {
+            for (Map.Entry<String, Boolean> entry : spots.get(position).entrySet()) {
+                a = entry.getValue();
 
-            if (a) {
-                available++;
-            } else {
-                unavailable++;
+                if (a) {
+                    available++;
+                } else {
+                    unavailable++;
+                }
+                total = available + unavailable;
             }
-            total = available + unavailable;
         }
-        holder.parkingStatus.setText(unavailable + "/" + total + " Occupied");
+        holder.parkingStatus.setText(available + "/" + total + " available");
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

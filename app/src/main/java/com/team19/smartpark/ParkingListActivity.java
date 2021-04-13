@@ -5,12 +5,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.widget.Toast;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,9 +28,7 @@ import java.util.TreeMap;
 
 public class ParkingListActivity extends AppCompatActivity {
     List<String> parkings = null;
-
-    private DatabaseReference PNDatabase;
-
+    private FirebaseAuth fAuth;
     ParkingListAdapter adapter;
     private RecyclerView plist;
     LinearLayoutManager ly;
@@ -40,8 +40,6 @@ public class ParkingListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parking_list);
         addParkingFAB = findViewById(R.id.addParkingfab);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
         addParkingFAB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,9 +48,10 @@ public class ParkingListActivity extends AppCompatActivity {
             }
         });
 
-        plist = findViewById(R.id.Parking_RecyclerView);
 
-        PNDatabase = FirebaseDatabase.getInstance().getReference(); //route
+
+        plist = findViewById(R.id.Parking_RecyclerView);
+        fAuth = FirebaseAuth.getInstance();
 
         ly = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         plist.addItemDecoration(new DividerItemDecoration(plist.getContext(), DividerItemDecoration.VERTICAL));
@@ -63,25 +62,22 @@ public class ParkingListActivity extends AppCompatActivity {
 
     }
 
-
-
     public void readParkings() {
 
-        PNDatabase.addValueEventListener(new ValueEventListener() {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid()+"/parkingLots");
+        ref.addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                ArrayList<String> id = new ArrayList<>();
-                ArrayList<String> name = new ArrayList<>();
                 ArrayList<HashMap<String, Boolean>> spots = new ArrayList<>();
-
                 TreeMap<String, Parking> keyParking = new TreeMap<>();
                 //datasnap stores key and value of a node
-                for (DataSnapshot keyNode : dataSnapshot.getChildren()) {
+                Iterable<DataSnapshot> infos = dataSnapshot.getChildren();
+                for (DataSnapshot keyNode : infos) {
                     keyParking.put(keyNode.getKey(), keyNode.getValue(Parking.class));
                 }
                 loadlist(keyParking);
-
             }
 
             @Override
@@ -91,9 +87,14 @@ public class ParkingListActivity extends AppCompatActivity {
 
     }
 
+
     private void loadlist(TreeMap<String, Parking> keyParking) {
         adapter = new ParkingListAdapter(keyParking, this);
         plist.setAdapter(adapter);
     }
 
+    private void goToParkingSpotsActivity() {
+        //Intent intent = new Intent(this, ParkingSpotsActivity.class);
+        //startActivity(intent);
+    }
 }

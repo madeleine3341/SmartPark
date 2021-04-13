@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -15,9 +16,11 @@
 
         <fragment
             android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:name="com.google.android.libraries.maps.SupportMapFragment"
+            class="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:mapId="@string/map_id"
             tools:context=".MapsActivity" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -48,8 +51,19 @@
             android:layout_marginBottom="627dp"
             android:background="@drawable/custom_background"
             android:backgroundTint="@color/white"
-            android:text="See nearby parking lots"
+            android:text="Filter"
             android:textSize="10sp" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/userButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="188dp"
+            android:clickable="true"
+            app:backgroundTint="@color/white"
+            app:srcCompat="@drawable/ic_baseline_person_24" />
         <SearchView
             android:id="@+id/search_bar"
             android:layout_width="364dp"
@@ -80,6 +94,45 @@
             app:backgroundTint="@color/white"
             app:srcCompat="@drawable/ic_baseline_gps_fixed_24" />
 
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/coordinator_layout">
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fab"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="0dp"/>
+
+            <fragment
+                android:id="@+id/parallax"
+                class="com.google.android.gms.maps.SupportStreetViewPanoramaFragment"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                tools:ignore="MissingClass" />
+
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/bottomsheet"
+                android:background="@android:color/white"
+                android:layout_gravity="bottom"
+                app:behavior_hideable="true"
+                app:behavior_peekHeight="100dp"
+                app:behavior_anchorHeight="auto"
+                app:behavior_header_layout="@layout/custom_header"
+                app:behavior_content_layout="@layout/custom_content"
+                app:behavior_anchorColor="@color/colorPrimary"
+                app:behavior_collapsedColor="@android:color/white"
+                app:layout_behavior="com.team19.smartpark.models.GoogleMapsBottomSheetBehaviour" />
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 
     </RelativeLayout>
 
@@ -95,6 +148,7 @@
             android:id="@+id/scrollViewFilter"
             android:layout_width="239dp"
             android:layout_height="43dp"
+            android:scrollbars="none"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.488"

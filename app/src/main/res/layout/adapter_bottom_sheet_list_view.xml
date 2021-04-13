@@ -28,25 +28,13 @@
                 android:text="Name"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/distanceTextView"
+                app:layout_constraintBottom_toTopOf="@+id/distanceTextView2"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.508"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.24" />
 
-            <TextView
-                android:id="@+id/distanceTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Distance to your destination"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/addressFilterTextView"
-                app:layout_constraintEnd_toStartOf="@+id/distanceTextView2"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.663" />
 
             <TextView
                 android:id="@+id/distanceTextView2"
@@ -57,9 +45,9 @@
                 app:layout_constraintBottom_toTopOf="@+id/addressFilterTextView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/distanceTextView"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.666" />
+                app:layout_constraintVertical_bias="0.86" />
 
             <TextView
                 android:id="@+id/addressFilterTextView"

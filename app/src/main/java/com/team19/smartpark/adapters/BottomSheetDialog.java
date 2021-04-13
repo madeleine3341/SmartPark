@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.firebase.auth.FirebaseAuth;
 import com.team19.smartpark.LinkSensorActivity;
 import com.team19.smartpark.R;
 
@@ -19,6 +20,8 @@ public class BottomSheetDialog extends BottomSheetDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        //FirebaseFirestore fStore = FirebaseFirestore.getInstance();
         View v = inflater.inflate(R.layout.bottom_sheet_layout, container, false);
         Button linkbtn = v.findViewById(R.id.linkBtn);
         linkbtn.setOnClickListener(new View.OnClickListener() {
@@ -26,12 +29,11 @@ public class BottomSheetDialog extends BottomSheetDialogFragment {
             public void onClick(View v) {
                 String spot = getArguments().getString("spot");
                 String parent = getArguments().getString("parent");
-                Log.d("TAG", "onClick: " + "/" + parent + "/spots/" + spot);
+                Log.d("TAG", "onClick: " + "/" + fAuth.getCurrentUser().getUid() + "/" + "parkingLots/" + parent + "/spots/" + spot);
                 dismiss();
                 Intent intent = new Intent(v.getContext(), LinkSensorActivity.class);
-                intent.putExtra("parkingPath", "/" + parent + "/spots/" + spot);
+                intent.putExtra("parkingPath", "/" + fAuth.getCurrentUser().getUid() + "/" + "parkingLots/" + parent + "/spots/" + spot);
                 startActivity(intent);
-
             }
         });
         return v;

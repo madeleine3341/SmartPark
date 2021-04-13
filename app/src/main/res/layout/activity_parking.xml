@@ -39,7 +39,7 @@
         android:layout_marginBottom="8dp"
         android:autofillHints=""
         android:ems="10"
-        android:hint="Spots"
+        android:hint="Spots (ex: ID1,ID2...)"
         app:layout_constraintBottom_toTopOf="@+id/feesTextView"
         app:layout_constraintStart_toStartOf="@+id/addressTextView"
         app:layout_constraintTop_toBottomOf="@+id/addressTextView" />
