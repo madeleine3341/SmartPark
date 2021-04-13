@@ -293,7 +293,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //Marker Bottom Sheet section********
 //        clickedMarkerCoordinates = new com.google.android.gms.maps.model.LatLng(0,0);
-        floatingAb = (FloatingActionButton) findViewById(R.id.fab);
+        floatingAb = findViewById(R.id.fab);
 
         SupportStreetViewPanoramaFragment streetViewPanoramaFragment = (SupportStreetViewPanoramaFragment)getSupportFragmentManager().findFragmentById(R.id.parallax);
         streetViewPanoramaFragment.getStreetViewPanoramaAsync(this);
@@ -403,7 +403,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 while (it.hasNext()) {
                     Map.Entry pair = (Map.Entry) it.next();
                     if ((Boolean) pair.getValue()) {
-                        vRecommended.setText((String) pair.getKey());
+                        vRecommended.setText(pair.getKey().toString().replace("Id", ""));
                         vRecommended.setTextColor(Color.BLACK);
                         availableExists = true;
                         break;
@@ -446,7 +446,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 }
 
-                ListView lv = (ListView) findViewById(R.id.markerSheetReviews);
+                ListView lv = findViewById(R.id.markerSheetReviews);
 
                 ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                         getApplicationContext(),
