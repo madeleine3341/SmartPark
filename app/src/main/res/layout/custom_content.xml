@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="#FCFCFD">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="395dp"
+        android:layout_height="219dp">
+
+        <!--            app:layout_constraintBottom_toTopOf="@+id/addressFilterTextView"-->
+        <!--            app:layout_constraintEnd_toStartOf="@+id/markerSheetFee"-->
+        <!--            app:layout_constraintHorizontal_bias="0.5"-->
+        <!--            app:layout_constraintStart_toEndOf="@+id/editTextTextPersonName3"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"--><![CDATA[
+            app:layout_constraintVertical_bias="0.663" />
+
+
+
+        ]]><!--            app:layout_constraintBottom_toTopOf="@+id/addressFilterTextView"-->
+        <!--            app:layout_constraintEnd_toStartOf="@+id/editTextTextPersonName4"-->
+        <!--            app:layout_constraintHorizontal_bias="0.714"-->
+        <!--            app:layout_constraintStart_toEndOf="@+id/editTextTextPersonName3"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"--><![CDATA[
+            app:layout_constraintVertical_bias="0.663" />
+
+        ]]><!--            app:layout_constraintBottom_toTopOf="@+id/addressFilterTextView"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintStart_toEndOf="@+id/editTextTextPersonName4"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"--><![CDATA[
+            app:layout_constraintVertical_bias="0.663" />
+
+        ]]><!--            app:layout_constraintBottom_toTopOf="@+id/editTextTextPersonName6"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@+id/markerSheetRecommended" />-->
+
+        <!--            app:layout_constraintBottom_toBottomOf="@+id/sheetStatus"-->
+        <!--            app:layout_constraintEnd_toStartOf="@+id/markerSheetRating"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintTop_toBottomOf="@+id/markerSheetAddress"-->
+        <!--            app:layout_constraintVertical_bias="0.663"--><![CDATA[
+            tools:ignore="MissingConstraints" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ]]>
+
+        <EditText
+            android:id="@+id/editTextTextPersonName4"
+            android:layout_width="49dp"
+            android:layout_height="46dp"
+            android:layout_marginBottom="8dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Fee:"
+            android:textSize="22dp"
+            app:layout_constraintBottom_toTopOf="@+id/editTextTextPersonName3"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/markerSheetAddress"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/markerSheetRecommended"
+            android:layout_width="86dp"
+            android:layout_height="25dp"
+            android:text="TextView"
+            android:textSize="18dp"
+            app:layout_constraintBottom_toTopOf="@+id/markerSheetRating"
+            app:layout_constraintEnd_toStartOf="@+id/markerSheetStatus"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/editTextTextPersonName3"
+            app:layout_constraintTop_toBottomOf="@+id/markerSheetAddress"
+            app:layout_constraintVertical_bias="0.571" />
+
+        <TextView
+            android:id="@+id/markerSheetFee"
+            android:layout_width="82dp"
+            android:layout_height="20dp"
+            android:text="TextView"
+            android:textSize="18dp"
+            app:layout_constraintBottom_toTopOf="@+id/editTextTextPersonName3"
+            app:layout_constraintStart_toEndOf="@+id/editTextTextPersonName4"
+            app:layout_constraintTop_toBottomOf="@+id/markerSheetAddress"
+            app:layout_constraintVertical_bias="0.555" />
+
+        <EditText
+            android:id="@+id/editTextTextPersonName6"
+            android:layout_width="162dp"
+            android:layout_height="44dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Average Rating:"
+            android:textSize="22dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/markerSheetRating"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/markerSheetAddress"
+            app:layout_constraintVertical_bias="0.774" />
+
+        <TextView
+            android:id="@+id/markerSheetRating"
+            android:layout_width="118dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="4dp"
+            android:text="TextView"
+            android:textSize="18dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/markerSheetStatus"
+            app:layout_constraintTop_toBottomOf="@+id/editTextTextPersonName3"
+            app:layout_constraintVertical_bias="0.36" />
+
+        <TextView
+            android:id="@+id/markerSheetStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="36dp"
+            android:text="TextView"
+            app:layout_constraintBottom_toTopOf="@+id/markerSheetRating"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/markerSheetAddress"
+            app:layout_constraintVertical_bias="0.15" />
+
+        <EditText
+            android:id="@+id/editTextTextPersonName3"
+            android:layout_width="116dp"
+            android:layout_height="45dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Avail. Spot:"
+            android:textSize="22dp"
+            app:layout_constraintBottom_toTopOf="@+id/editTextTextPersonName6"
+            app:layout_constraintTop_toBottomOf="@+id/markerSheetAddress"
+            app:layout_constraintVertical_bias="0.734"
+            tools:ignore="MissingConstraints"
+            tools:layout_editor_absoluteX="0dp" />
+
+        <TextView
+            android:id="@+id/markerSheetAddress"
+            android:layout_width="394dp"
+            android:layout_height="32dp"
+            android:text="TextView"
+            android:textSize="28dp"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="-7dp" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:background="#FCFCFD">
+
+        <ListView
+            android:id="@+id/markerSheetReviews"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+
+</LinearLayout>
