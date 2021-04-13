@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -32,6 +34,7 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -40,10 +43,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
+import com.google.android.gms.maps.StreetViewPanorama;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.SupportStreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
@@ -51,8 +60,6 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -64,15 +71,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.team19.smartpark.adapters.filterListAdapter;
-import com.team19.smartpark.models.Parking;
-//marker bottom sheet imports
 import com.team19.smartpark.models.GoogleMapsBottomSheetBehaviour;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import android.view.ViewTreeObserver;
-import com.google.android.gms.maps.StreetViewPanorama;
-import com.google.android.gms.maps.SupportStreetViewPanoramaFragment;
-import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
-
+import com.team19.smartpark.models.Parking;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -85,8 +85,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, AdapterView.OnItemSelectedListener, OnStreetViewPanoramaReadyCallback {
+//marker bottom sheet imports
 
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, AdapterView.OnItemSelectedListener, OnStreetViewPanoramaReadyCallback {
 
 
     private static final String TAG = MapsActivity.class.getSimpleName();
@@ -97,18 +98,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // A default location (Sydney, Australia) and default zoom to use when location permission is
     // not granted.
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
+    FirebaseAuth fAuth;
+    FloatingActionButton floatingAb;
     private DatabaseReference mDatabase;
     private FirebaseFirestore fStore;
     private GoogleMap mMap;
     private SearchView searchView;
     private ImageView closeButton;
-
     private Context context;
     private LinearLayout linearLayout;
     private ListView filterListView;
     private LinearLayoutManager llm;
     private Button nearbyButton, clearButton;
-    private ToggleButton sASButton,sFeesButton,openButton;
+    private ToggleButton sASButton, sFeesButton, openButton;
     private Spinner sDistanceButton;
     private TextView textView;
     private LatLng cameraLatLng;
@@ -127,12 +129,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FloatingActionButton fab;
     private FloatingActionButton myLocationButton;
     private FloatingActionButton userButton;
-    FirebaseAuth fAuth;
     //for marker bottom sheet
     private GoogleMapsBottomSheetBehaviour behavior;
     private View parallax;
-    FloatingActionButton floatingAb;
-//    private com.google.android.gms.maps.model.LatLng clickedMarkerCoordinates;
+    //    private com.google.android.gms.maps.model.LatLng clickedMarkerCoordinates;
     private TextView vCoordinates;
     private TextView vName;
     private TextView vRecommended;
@@ -166,22 +166,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         userButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(fAuth.getCurrentUser()!=null){
+                if (fAuth.getCurrentUser() != null) {
                     startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                }
-                else {
+                } else {
                     startActivity(new Intent(getApplicationContext(), Register.class));
                     finish();
                 }
             }
         });
-        if(fAuth.getCurrentUser()!=null) {
+        if (fAuth.getCurrentUser() != null) {
             FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid()+"/userInfo/type");
+            DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid() + "/userInfo/type");
             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.exists()) {
+                    if (dataSnapshot.exists()) {
                         if (dataSnapshot.getValue().equals("B")) {
                             fab.setVisibility(View.VISIBLE);
                         } else {
@@ -195,8 +194,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     fab.setVisibility(View.GONE);
                 }
             });
-        }
-        else{
+        } else {
             fab.setVisibility(View.GONE);
         }
         myLocationButton.setOnClickListener(new View.OnClickListener() {
@@ -246,7 +244,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
-                cameraLatLng = new LatLng(lastKnownLocation.getLatitude(),lastKnownLocation.getLongitude());
+                cameraLatLng = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                 updateFilterUI(false);
                 return false;
             }
@@ -295,7 +293,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        clickedMarkerCoordinates = new com.google.android.gms.maps.model.LatLng(0,0);
         floatingAb = findViewById(R.id.fab);
 
-        SupportStreetViewPanoramaFragment streetViewPanoramaFragment = (SupportStreetViewPanoramaFragment)getSupportFragmentManager().findFragmentById(R.id.parallax);
+        SupportStreetViewPanoramaFragment streetViewPanoramaFragment = (SupportStreetViewPanoramaFragment) getSupportFragmentManager().findFragmentById(R.id.parallax);
         streetViewPanoramaFragment.getStreetViewPanoramaAsync(this);
 
         final View bottomsheet = findViewById(R.id.bottomsheet);
@@ -334,14 +332,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     //send to google map show directions
-        public void DisplayTrack(String destination) {
-            getDeviceLocation();
-            Double la=lastKnownLocation.getLatitude();
-            Double lo=lastKnownLocation.getLongitude();
+    public void DisplayTrack(String destination) {
+        getDeviceLocation();
+        Double la = lastKnownLocation.getLatitude();
+        Double lo = lastKnownLocation.getLongitude();
 
 
         try {
-            Uri uri = Uri.parse("https://www.google.co.in/maps/dir/" + la +","+ lo + "/" + destination);
+            Uri uri = Uri.parse("https://www.google.co.in/maps/dir/" + la + "," + lo + "/" + destination);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
             intent.setPackage("com.google.android.apps.maps");
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -361,8 +359,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-// ...
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            boolean success = mMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.style_json));
 
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "Can't find style. Error: ", e);
+        }
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
 
@@ -380,14 +389,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                clickedMarkerCoordinates = marker.getPosition();
                 //finding the right parking in parking list using the marker title
                 HashMap<String, Boolean> temp = new HashMap<String, Boolean>();
-                Parking targetParking = new Parking("N/A",0,0,"N/A",temp,false,0);
+                Parking targetParking = new Parking("N/A", 0, 0, "N/A", temp, false, 0);
                 for (Map.Entry<String, Parking> parkingSet :
                         parkingsList.entrySet()) {
-                    if (marker.getTitle().equals(parkingSet.getValue().name)){
+                    if (marker.getTitle().equals(parkingSet.getValue().name)) {
                         targetParking = parkingSet.getValue();
                     }
                 }
-
 
 
                 vCoordinates = findViewById(R.id.markerSheetCoordinates);
@@ -415,31 +423,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 }
 
-                if(targetParking.isStatus()){
+                if (targetParking.isStatus()) {
                     vStatus.setText("Open");
                     vStatus.setTextColor(Color.GREEN);
-                }else{
+                } else {
                     vStatus.setText("Closed");
                     vStatus.setTextColor(Color.RED);
                 }
 
                 double rating = 4;
                 int numOfRatings = 5;
-                double[] ratings = new double [numOfRatings];
+                double[] ratings = new double[numOfRatings];
                 ArrayList<String> reviews = new ArrayList<>();
-                for(int i = 0; i < numOfRatings; i++){
-                    if (numOfRatings % 2 != 0 && i == 0){
+                for (int i = 0; i < numOfRatings; i++) {
+                    if (numOfRatings % 2 != 0 && i == 0) {
                         reviews.add("Dave " + rating + "/5");
                         reviews.add("It was exactly as expected, however i will look at the other parking lots on the app to see if there are any that are better for me.");
                         reviews.add(" ");
-                    }else if (i % 2 == 0){
+                    } else if (i % 2 == 0) {
                         reviews.add("Loretta " + (rating + 0.5) + "/5");
-                        if (ratings[i] > 5){
+                        if (ratings[i] > 5) {
                             ratings[i] = 5;
                         }
                         reviews.add("This place was exceptional and cared to my needs, i hope i will be able to get some rewards soon!!!");
                         reviews.add(" ");
-                    }else{
+                    } else {
                         reviews.add("Tarek " + (rating - 0.5) + "/5");
                         reviews.add("This parking lot was not as expected and i will be going back to my other parking lot, however i will miss the smart functionality and hope it expands to all the parking lots.");
                         reviews.add(" ");
@@ -451,22 +459,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                         getApplicationContext(),
                         android.R.layout.simple_list_item_1,
-                        reviews );
+                        reviews);
 
                 lv.setAdapter(arrayAdapter);
 
                 vRating.setText("4/5");
                 vRating.setTextColor(Color.BLACK);
-                vCoordinates.setText(targetParking.getLat()+","+targetParking.getLng());
+                vCoordinates.setText(targetParking.getLat() + "," + targetParking.getLng());
                 vCoordinates.setTextColor(Color.BLACK);
                 vName.setText(targetParking.getName());
                 vName.setTextColor(Color.BLACK);
-                vFee.setText(targetParking.getfees()+"0$");
+                vFee.setText(targetParking.getfees() + "0$");
                 vFee.setTextColor(Color.BLACK);
                 vAddress.setText(targetParking.getAddress());
                 vAddress.setTextColor(Color.BLACK);
                 //marker.getPosition()
-                streetPan.setPosition(marker.getPosition() );
+                streetPan.setPosition(marker.getPosition());
 
                 return true;
                 //finding the right reviews and invoking the bottom sheet content adapter
@@ -501,10 +509,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Iterable<DataSnapshot> parkingList = dataSnapshot.getChildren();
                 for (DataSnapshot keyNode : parkingList) {
                     Iterable<DataSnapshot> e = keyNode.getChildren();
-                    for(DataSnapshot parkingList12 : e){
-                        if(parkingList12.getKey().equals("parkingLots")) {
+                    for (DataSnapshot parkingList12 : e) {
+                        if (parkingList12.getKey().equals("parkingLots")) {
                             Iterable<DataSnapshot> e2 = parkingList12.getChildren();
-                            for(DataSnapshot listofParking : e2){
+                            for (DataSnapshot listofParking : e2) {
                                 Log.i("Bug: ", String.valueOf(listofParking.getValue()));
                                 parkingsList.put(String.valueOf(listofParking.getKey()), listofParking.getValue(Parking.class));
                             }
@@ -518,7 +526,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     int available = 0;
                     String parkingId = null;
                     Marker previousMarker = null;
-                    if(parking.spots != null && (parking.name != null||parking.name != "") && (parking.address != null||parking.address != "")) {
+                    if (parking.spots != null && (parking.name != null || parking.name != "") && (parking.address != null || parking.address != "")) {
                         count = parking.spots.size();
                         available = Collections.frequency(parking.spots.values(), true);
                         parkingId = parkingSet.getKey();
@@ -689,18 +697,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sASButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
+                if (!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-                else if(!sASButton.isChecked()){
+                } else if (!sASButton.isChecked()) {
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sortAlgorithm();
-                }
-                else{
-                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                } else {
+                    sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235, 236, 246)));
                     sortAlgorithm();
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
@@ -709,18 +715,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         openButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked()) {
+                if (!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked()) {
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-                else if(!openButton.isChecked()){
+                } else if (!openButton.isChecked()) {
                     openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sortAlgorithm();
-                }
-                else{
-                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                } else {
+                    openButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235, 236, 246)));
                     sortAlgorithm();
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
@@ -729,18 +733,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sFeesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
+                if (!sASButton.isChecked() && spinnerPosition == 0 && !openButton.isChecked() && !sFeesButton.isChecked()) {
                     sASButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     openButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-                else if(!sFeesButton.isChecked()){
+                } else if (!sFeesButton.isChecked()) {
                     sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
                     sortAlgorithm();
-                }
-                else{
-                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235,236,246)));
+                } else {
+                    sFeesButton.setBackgroundTintList(ColorStateList.valueOf(Color.rgb(235, 236, 246)));
                     sortAlgorithm();
                     mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
@@ -755,7 +757,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(myCircle!= null) {
+                if (myCircle != null) {
                     myCircle.remove();
                     myCircle = null;
                 }
@@ -765,24 +767,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         spinnerPosition = position;
-        if(parent.getItemAtPosition(position) != null && position != 0) {
+        if (parent.getItemAtPosition(position) != null && position != 0) {
             String text = parent.getItemAtPosition(position).toString();
             Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
             sortAlgorithm();
             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        }
-        else if(position == 0 && !sASButton.isChecked() && !sFeesButton.isChecked() && !openButton.isChecked()){
-            if(myCircle!= null) {
+        } else if (position == 0 && !sASButton.isChecked() && !sFeesButton.isChecked() && !openButton.isChecked()) {
+            if (myCircle != null) {
                 myCircle.remove();
                 myCircle = null;
             }
             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
-        else if(spinnerPosition == 0){
-            if(myCircle!= null) {
+        } else if (spinnerPosition == 0) {
+            if (myCircle != null) {
                 myCircle.remove();
                 myCircle = null;
             }
@@ -793,16 +794,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
-    private void updateFilterUI(Boolean state){
-        if(state){
+
+    private void updateFilterUI(Boolean state) {
+        if (state) {
             nearbyButton.setVisibility(View.GONE);
             horizontalScrollView.setVisibility(View.VISIBLE);
             clearButton.setVisibility(View.VISIBLE);
             textView.setVisibility(View.VISIBLE);
             linearLayout.setVisibility(View.VISIBLE);
 
-        }
-        else{
+        } else {
             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             nearbyButton.setVisibility(View.VISIBLE);
             horizontalScrollView.setVisibility(View.GONE);
@@ -817,6 +818,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             sFeesButton.setChecked(false);
         }
     }
+
     private void sortAlgorithm() {
         cameraLatLng = mMap.getCameraPosition().target;
         //Create two float to store distance between two locations
@@ -844,10 +846,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 radius = 500;
                 break;
             default:
-                if(sASButton.isChecked() || openButton.isChecked() || sFeesButton.isChecked()){
+                if (sASButton.isChecked() || openButton.isChecked() || sFeesButton.isChecked()) {
                     radius = 2000;
-                }
-                else {
+                } else {
                     radius = 0;
                 }
                 break;
@@ -858,15 +859,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ArrayList<String> distance = new ArrayList<String>();
         for (Map.Entry<String, Parking> parkingSet : parkingsList.entrySet()) {
             Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, parkingSet.getValue().lat, parkingSet.getValue().lng, result1);
-            if(result1[0] < radius){
+            if (result1[0] < radius) {
                 filter.add(parkingSet.getValue());
             }
         }
-        if(myCircle != null){
+        if (myCircle != null) {
             myCircle.remove();
             myCircle = null;
         }
-        if(spinnerPosition>0) {
+        if (spinnerPosition > 0) {
             CircleOptions circleOptions = new CircleOptions()
                     .center(cameraLatLng)   //set center
                     .radius(radius)   //set radius in meters
@@ -884,19 +885,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 double fee2 = 0;
                 float operatingHour1 = 0;
                 float operatingHour2 = 0;
-                if(sASButton.isChecked()){
-                    spot1 = Collections.frequency(filter.get(i).spots.values(), true)/filter.get(i).spots.size();
-                    spot2 = Collections.frequency(filter.get(j).spots.values(), true)/filter.get(j).spots.size();
-                }
-                else{
+                if (sASButton.isChecked()) {
+                    spot1 = Collections.frequency(filter.get(i).spots.values(), true) / filter.get(i).spots.size();
+                    spot2 = Collections.frequency(filter.get(j).spots.values(), true) / filter.get(j).spots.size();
+                } else {
                     spot1 = 0;
                     spot2 = 0;
                 }
-                if(sFeesButton.isChecked()){
+                if (sFeesButton.isChecked()) {
                     fee1 = filter.get(i).fees;
                     fee2 = filter.get(j).fees;
                 }
-                if(openButton.isChecked()) {
+                if (openButton.isChecked()) {
                     String a = filter.get(i).operatingHour;
                     String b = filter.get(j).operatingHour;
                     float ch1 = Float.valueOf(a.substring(a.indexOf("-") + 1, a.indexOf(":", a.indexOf("-")))) + Float.valueOf(a.substring(a.indexOf(":", a.indexOf("-")) + 1)) / 60;
@@ -906,18 +906,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Log.i("Spot1 Hour: ", String.valueOf(operatingHour1));
                     Log.i("Spot2 Hour: ", String.valueOf(operatingHour2));
                 }
-                if(spinnerPosition>0){
+                if (spinnerPosition > 0) {
                     Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
                     Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
-                }
-                else{
+                } else {
                     result1[0] = 0;
                     result2[0] = 0;
                 }
-                float score1 = (float) (0.7*(result1[0]/2000) + 0.1*spot1 + 0.1*(1-operatingHour1) + 0.1*(fee1));
-                float score2 = (float) (0.7*(result2[0]/2000) + 0.1*spot2 + 0.1*(1-operatingHour2)+ 0.1*(fee2));
-                if(score1>score2){
-                    Collections.swap(filter,j,i);
+                float score1 = (float) (0.7 * (result1[0] / 2000) + 0.1 * spot1 + 0.1 * (1 - operatingHour1) + 0.1 * (fee1));
+                float score2 = (float) (0.7 * (result2[0] / 2000) + 0.1 * spot2 + 0.1 * (1 - operatingHour2) + 0.1 * (fee2));
+                if (score1 > score2) {
+                    Collections.swap(filter, j, i);
                 }
             }
         }
@@ -931,9 +930,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         filterListView.setAdapter(adapter);
     }
 
-    public void updateview(LatLng latLng){
+    public void updateview(LatLng latLng) {
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 20));
     }
-    
+
 }
 

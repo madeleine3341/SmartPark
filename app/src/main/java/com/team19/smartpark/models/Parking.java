@@ -1,6 +1,6 @@
 package com.team19.smartpark.models;
 
-import com.google.android.libraries.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.HashMap;

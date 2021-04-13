@@ -23,7 +23,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.libraries.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.team19.smartpark.models.FirebaseHelper;
 import com.team19.smartpark.models.Parking;
