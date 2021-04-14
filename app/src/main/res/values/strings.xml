@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">SmartPark</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps">SmartPark</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="AVspots">avaliable spots</string>
+    <string name="AVspots">available spots</string>
     <string name="x">X</string>
     <string-array name="string">
         <item>Distance</item>
