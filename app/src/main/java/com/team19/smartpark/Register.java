@@ -21,17 +21,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Register extends AppCompatActivity {
-    private EditText mFullName,mEmail,mPassword,mPhone;
-    private Button mRegisterBtn,registerSkipButton;
+    private EditText mFullName, mEmail, mPassword, mPhone;
+    private Button mRegisterBtn, registerSkipButton;
     private TextView mLoginBtn;
     private FirebaseAuth fAuth;
     private ProgressBar progressBar;
@@ -44,20 +42,20 @@ public class Register extends AppCompatActivity {
         setContentView(R.layout.activity_register);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mFullName   = findViewById(R.id.fullName);
-        mEmail      = findViewById(R.id.Email);
-        mPassword   = findViewById(R.id.password);
-        mPhone      = findViewById(R.id.phone);
-        mRegisterBtn= findViewById(R.id.registerBtn);
-        mLoginBtn   = findViewById(R.id.createText);
+        mFullName = findViewById(R.id.fullName);
+        mEmail = findViewById(R.id.Email);
+        mPassword = findViewById(R.id.password);
+        mPhone = findViewById(R.id.phone);
+        mRegisterBtn = findViewById(R.id.registerBtn);
+        mLoginBtn = findViewById(R.id.createText);
         registerSkipButton = findViewById(R.id.loginSkipButton);
 
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
         progressBar = findViewById(R.id.progressBar);
 
-        if(fAuth.getCurrentUser() != null){
-            startActivity(new Intent(getApplicationContext(),MapsActivity.class));
+        if (fAuth.getCurrentUser() != null) {
+            startActivity(new Intent(getApplicationContext(), MapsActivity.class));
             finish();
         }
 
@@ -75,19 +73,19 @@ public class Register extends AppCompatActivity {
                 final String email = mEmail.getText().toString().trim();
                 String password = mPassword.getText().toString().trim();
                 final String fullName = mFullName.getText().toString();
-                final String phone    = mPhone.getText().toString();
+                final String phone = mPhone.getText().toString();
 
-                if(TextUtils.isEmpty(email)){
+                if (TextUtils.isEmpty(email)) {
                     mEmail.setError("Email is Required.");
                     return;
                 }
 
-                if(TextUtils.isEmpty(password)){
+                if (TextUtils.isEmpty(password)) {
                     mPassword.setError("Password is Required.");
                     return;
                 }
 
-                if(password.length() < 6){
+                if (password.length() < 6) {
                     mPassword.setError("Password Must be >= 6 Characters");
                     return;
                 }
@@ -96,10 +94,10 @@ public class Register extends AppCompatActivity {
 
                 // register the user in firebase
 
-                fAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                fAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
 
                             // send verification link
 
@@ -127,7 +125,7 @@ public class Register extends AppCompatActivity {
                             startActivity(new Intent(getApplicationContext(), MapsActivity.class));
                             finish();
 
-                        }else {
+                        } else {
                             Toast.makeText(Register.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);
                         }
@@ -137,11 +135,10 @@ public class Register extends AppCompatActivity {
         });
 
 
-
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(),LoginActivity.class));
+                startActivity(new Intent(getApplicationContext(), LoginActivity.class));
                 finish();
             }
         });

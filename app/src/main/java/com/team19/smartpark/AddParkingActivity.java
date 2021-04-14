@@ -1,21 +1,16 @@
 package com.team19.smartpark;
 
 import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
-import android.util.Log;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -30,7 +25,6 @@ import com.team19.smartpark.models.Parking;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -45,8 +39,8 @@ public class AddParkingActivity extends AppCompatActivity {
     private TextView openTextView;
     private TextView closeTextView;
 
-    private int t1Hour,t1Minute,t2Hour,t2Minute;
-    private boolean t1State,t2State;
+    private int t1Hour, t1Minute, t2Hour, t2Minute;
+    private boolean t1State, t2State;
     private ImageButton selectLocationBtn;
 
     private FloatingActionButton actionBtn;
@@ -71,16 +65,16 @@ public class AddParkingActivity extends AppCompatActivity {
                 new SelectionLocationMapFragment().show(getSupportFragmentManager(), null);
             }
         });
-        feesTextView =findViewById(R.id.feesTextView);
+        feesTextView = findViewById(R.id.feesTextView);
         openTextView = findViewById(R.id.openTextView);
         closeTextView = findViewById(R.id.closeTextView);
 
-        String udata="Select Opening Hour";
+        String udata = "Select Opening Hour";
         SpannableString content = new SpannableString(udata);
         content.setSpan(new UnderlineSpan(), 0, udata.length(), 0);
         openTextView.setHint(content);
 
-        udata="Select Closing Hour";
+        udata = "Select Closing Hour";
         content = new SpannableString(udata);
         content.setSpan(new UnderlineSpan(), 0, udata.length(), 0);
         closeTextView.setHint(content);
@@ -104,17 +98,17 @@ public class AddParkingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String name = nameTextView.getText().toString();
                 String address = addressTextView.getText().toString();
-                String fee=feesTextView.getText().toString();
+                String fee = feesTextView.getText().toString();
                 double fees = Double.parseDouble(fee);
 
                 String strSpots = spotsTextView.getText().toString();
                 strSpots = strSpots.replace(" ", "");
                 String[] spots = strSpots.split(",");
-                for(int i = 0;i<spots.length;i++){
-                    spots[i] = "Id"+spots[i];
+                for (int i = 0; i < spots.length; i++) {
+                    spots[i] = "Id" + spots[i];
                 }
-                String operatingHour = t1Hour + ":" +t1Minute +"-"+t2Hour+":"+t2Minute;
-                String feee=feesTextView.getText().toString();
+                String operatingHour = t1Hour + ":" + t1Minute + "-" + t2Hour + ":" + t2Minute;
+                String feee = feesTextView.getText().toString();
                 double feees = Double.parseDouble(feee);
                 HashMap<String, Boolean> hashspot = new HashMap<>();
                 for (String spot :
@@ -130,7 +124,7 @@ public class AddParkingActivity extends AppCompatActivity {
                     parking.operatingHour = operatingHour;
                     parking.spots = hashspot;
                     parking.setLatLng(parkingLocation);
-                    parking.fees=fees;
+                    parking.fees = fees;
                     FirebaseHelper.addParkingLots(parking);
                     Toast.makeText(getApplicationContext(), "Parking added successfully", Toast.LENGTH_SHORT).show();
                     finish();
@@ -145,7 +139,8 @@ public class AddParkingActivity extends AppCompatActivity {
         parkingLocation = latLng;
         locationSelected = true;
     }
-    private void timeDiaLog(String text){
+
+    private void timeDiaLog(String text) {
         TimePickerDialog timePickerDialog = new TimePickerDialog(
                 AddParkingActivity.this,
                 android.R.style.Theme_Holo_Light_Dialog_MinWidth,
@@ -153,66 +148,63 @@ public class AddParkingActivity extends AppCompatActivity {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                         String time = null;
-                        if(text == "open") {
+                        if (text == "open") {
                             t1Hour = hourOfDay;
                             t1Minute = minute;
-                            time = t1Hour+ ":" + t1Minute;
-                        }
-                        else{
+                            time = t1Hour + ":" + t1Minute;
+                        } else {
                             t2Hour = hourOfDay;
                             t2Minute = minute;
-                            time = t2Hour+ ":" + t2Minute;
+                            time = t2Hour + ":" + t2Minute;
                         }
                         SimpleDateFormat f24Hours = new SimpleDateFormat("HH:mm");
                         try {
                             Date date = f24Hours.parse(time);
-                            if(text == "open") {
-                                if(timeSelectionGuard() && t2State){
+                            if (text == "open") {
+                                if (timeSelectionGuard() && t2State) {
                                     String udata = "Select Opening Hour";
                                     SpannableString content = new SpannableString(udata);
                                     content.setSpan(new UnderlineSpan(), 0, udata.length(), 0);
                                     openTextView.setText(content);
                                     t1State = false;
-                                    Toast.makeText(AddParkingActivity.this,"Please Enter a Valid Opening Hour",Toast.LENGTH_LONG).show();
+                                    Toast.makeText(AddParkingActivity.this, "Please Enter a Valid Opening Hour", Toast.LENGTH_LONG).show();
                                     return;
                                 }
-                                String sourceString = "<b>"+"Opening Hour: "+"</b>"+ f24Hours.format(date);
+                                String sourceString = "<b>" + "Opening Hour: " + "</b>" + f24Hours.format(date);
                                 openTextView.setText(Html.fromHtml(sourceString, Html.FROM_HTML_MODE_LEGACY));
-                            }
-                            else{
-                                if(timeSelectionGuard() && t1State){
+                            } else {
+                                if (timeSelectionGuard() && t1State) {
                                     String udata = "Select Closing Hour";
                                     SpannableString content = new SpannableString(udata);
                                     content.setSpan(new UnderlineSpan(), 0, udata.length(), 0);
                                     closeTextView.setText(content);
                                     t2State = false;
-                                    Toast.makeText(AddParkingActivity.this,"Please Enter a Valid Closing Hour",Toast.LENGTH_LONG).show();
+                                    Toast.makeText(AddParkingActivity.this, "Please Enter a Valid Closing Hour", Toast.LENGTH_LONG).show();
                                     return;
                                 }
-                                String sourceString = "<b>"+"Closing Hour: "+"</b>" + f24Hours.format(date);
+                                String sourceString = "<b>" + "Closing Hour: " + "</b>" + f24Hours.format(date);
                                 closeTextView.setText(Html.fromHtml(sourceString, Html.FROM_HTML_MODE_LEGACY));
                             }
-                        } catch (ParseException e){
+                        } catch (ParseException e) {
                             e.printStackTrace();
                         }
-                        if(text == "open") {
+                        if (text == "open") {
                             t1State = true;
-                        }
-                        else{
+                        } else {
                             t2State = true;
                         }
                     }
-                },24,0,true
+                }, 24, 0, true
         );
-        if(t1State && text == "open"){
+        if (t1State && text == "open") {
             timePickerDialog.updateTime(t1Hour, t1Minute);
-        }
-        else{
+        } else {
             timePickerDialog.updateTime(t2Hour, t2Minute);
         }
         timePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         timePickerDialog.show();
     }
+
     private boolean timeSelectionGuard() {
         if (t1Hour > t2Hour) {
             return true;

@@ -24,14 +24,13 @@ import java.util.Map;
 public class filterListAdapter extends ArrayAdapter<String> {
     private final int mylayout;
     private final Context fcontext;
+    private final ArrayList<String> avSpots = new ArrayList<String>();
+    private final ArrayList<String> SPOTS = new ArrayList<String>();
+    Bundle bundle = new Bundle();
     private ArrayList<Parking> parkingInfo = new ArrayList<Parking>();
     private ArrayList<String> fdistance = new ArrayList<String>();
-    private final ArrayList<String> avSpots = new ArrayList<String>();
-
-    private final ArrayList<String> SPOTS = new ArrayList<String>();
     private Button directions;
     private Button showspotslist;
-    Bundle bundle = new Bundle();
 
 
     public filterListAdapter(Context context, int resource, ArrayList<Parking> parkingInfo, ArrayList<String> distance) {
@@ -50,20 +49,20 @@ public class filterListAdapter extends ArrayAdapter<String> {
             avSpots.add(avs);
         }
     }
+
     public int getCount() {
-        if(parkingInfo.size() == 0){
+        if (parkingInfo.size() == 0) {
             return 1;
-        }
-        else {
+        } else {
             return parkingInfo.size();
         }
     }
 
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent){
+    public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(fcontext);
-        convertView = inflater.inflate(mylayout,parent,false);
+        convertView = inflater.inflate(mylayout, parent, false);
 
         directions = convertView.findViewById(R.id.directionsbutton);
         directions.setOnClickListener(new View.OnClickListener() {
@@ -98,28 +97,27 @@ public class filterListAdapter extends ArrayAdapter<String> {
             public void onClick(View v) {
                 SPOTS.clear();
                 SPOTS.add("Avaliable Spots:");
-                if(parkingInfo.size() > 0 && Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
+                if (parkingInfo.size() > 0 && Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
                     SPOTS.add(avSpots.get(position).replace("Id", ""));
                     bundle.putStringArrayList(fcontext.getString(R.string.AVspots), SPOTS);
                 }
                 AvailableSpotsFragment fragobj = new AvailableSpotsFragment();
                 fragobj.setArguments(bundle);
 
-                FragmentActivity activity=(FragmentActivity)(getContext());
-                FragmentManager fm= activity.getSupportFragmentManager();
+                FragmentActivity activity = (FragmentActivity) (getContext());
+                FragmentManager fm = activity.getSupportFragmentManager();
                 fragobj.show(fm, "Spots list");
 
             }
         });
         TextView noResult = convertView.findViewById(R.id.noResultTextView);
-        if(parkingInfo.size() > 0 && Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
+        if (parkingInfo.size() > 0 && Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
             name.setText(parkingInfo.get(position).name);
             fees.setText("Fees: " + parkingInfo.get(position).fees + "$/hr");
             operatingHours.setText("Operating Hours: " + parkingInfo.get(position).getOperatingHour());
-            address.setText("Address: "+parkingInfo.get(position).address);
-            distance.setText("Distance to your destination: "+fdistance.get(position) + " m");
-        }
-        else{
+            address.setText("Address: " + parkingInfo.get(position).address);
+            distance.setText("Distance to your destination: " + fdistance.get(position) + " m");
+        } else {
             name.setText("");
             address.setText("");
             distance.setText("");

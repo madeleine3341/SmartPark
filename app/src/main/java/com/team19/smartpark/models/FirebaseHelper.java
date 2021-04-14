@@ -1,24 +1,16 @@
 package com.team19.smartpark.models;
 
-import android.annotation.SuppressLint;
 import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.team19.smartpark.models.Parking;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Map;
 
 public class FirebaseHelper {
@@ -49,19 +41,20 @@ public class FirebaseHelper {
 
     public static void addParkingLots(Parking parking) {
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
-        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid()+"/parkingLots").child(parking.name).setValue(parking);
+        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid() + "/parkingLots").child(parking.name).setValue(parking);
 
     }
 
     public static void addParkingSpot(String parkingId, Map<String, Object> spots) {
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
-        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid()+"/parkingLots/"+parkingId).child("spots").updateChildren(spots);
+        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid() + "/parkingLots/" + parkingId).child("spots").updateChildren(spots);
         Log.d("TAG", "addParkingSpot: ");
 
     }
-    public static void removeParkingLots(String parkingLotId){
+
+    public static void removeParkingLots(String parkingLotId) {
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
-        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid()+"/parkingLots/"+parkingLotId).removeValue();
+        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid() + "/parkingLots/" + parkingLotId).removeValue();
 
     }
 }

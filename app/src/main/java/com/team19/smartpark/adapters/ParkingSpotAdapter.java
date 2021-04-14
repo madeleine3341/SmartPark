@@ -22,7 +22,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.team19.smartpark.MapsActivity;
 import com.team19.smartpark.ParkingListActivity;
 import com.team19.smartpark.ParkingSpotsActivity;
 import com.team19.smartpark.R;
@@ -37,22 +36,21 @@ public class ParkingSpotAdapter extends RecyclerView.Adapter<ParkingSpotAdapter.
     FragmentManager fragmentManager;
     Context context;
     Boolean deleteMode;
-    private FirebaseAuth fAuth;
-    private Boolean flag;
+    private final FirebaseAuth fAuth;
+    private final Boolean flag;
 
     public ParkingSpotAdapter(Context ctx, TreeMap<String, Boolean> spots, FragmentManager fragmentManager, Boolean deleteMode) {
-        this.spots = new ArrayList<Map.Entry<String, Boolean>>(spots.entrySet());
+        ParkingSpotAdapter.spots = new ArrayList<Map.Entry<String, Boolean>>(spots.entrySet());
         this.inflater = LayoutInflater.from(ctx);
         this.fragmentManager = fragmentManager;
         this.context = ctx;
         this.deleteMode = deleteMode;
         fAuth = FirebaseAuth.getInstance();
-        if(spots.size() == 1){
-            flag = true;
-        }
-        else{
-            flag = false;
-        }
+        flag = spots.size() == 1;
+    }
+
+    public static void clearData() {
+        spots.clear();
     }
 
     @NonNull
@@ -65,14 +63,12 @@ public class ParkingSpotAdapter extends RecyclerView.Adapter<ParkingSpotAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Map.Entry<String, Boolean> spot = spots.get(position);
-        holder.parkingSpotId.setText(spot.getKey().replace("Id",""));
+        holder.parkingSpotId.setText(spot.getKey().replace("Id", ""));
         if (spot.getValue()) {
             holder.cardView.setCardBackgroundColor(Color.GREEN);
-        }
-        else if(spot.getKey() == null){
+        } else if (spot.getKey() == null) {
             holder.cardView.removeAllViews();
-        }
-        else {
+        } else {
 
             holder.cardView.setCardBackgroundColor(Color.RED);
         }
@@ -108,13 +104,13 @@ public class ParkingSpotAdapter extends RecyclerView.Adapter<ParkingSpotAdapter.
             holder.deleteCross.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    DatabaseReference mSpot = FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid()+"/parkingLots/"+ ParkingSpotsActivity.parkingPath + "/spots");
+                    DatabaseReference mSpot = FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid() + "/parkingLots/" + ParkingSpotsActivity.parkingPath + "/spots");
                     mSpot.child(spot.getKey()).removeValue(new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                            if(flag){
+                            if (flag) {
                                 context.startActivity(new Intent(context, ParkingListActivity.class));
-                                ((ParkingSpotsActivity)context).finish();
+                                ((ParkingSpotsActivity) context).finish();
                             }
                             Toast.makeText(context, "Spot " + spot.getKey() + " deleted", Toast.LENGTH_SHORT).show();
                         }
@@ -131,14 +127,11 @@ public class ParkingSpotAdapter extends RecyclerView.Adapter<ParkingSpotAdapter.
         return spots.size();
     }
 
-    public static void clearData() {
-        spots.clear();
-    }
-
     public class ViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
         TextView parkingSpotId;
         ImageView deleteCross;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = itemView.findViewById(R.id.parkingCard);

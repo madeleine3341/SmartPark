@@ -1,15 +1,14 @@
 package com.team19.smartpark;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.Toast;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,10 +27,10 @@ import java.util.TreeMap;
 
 public class ParkingListActivity extends AppCompatActivity {
     List<String> parkings = null;
-    private FirebaseAuth fAuth;
     ParkingListAdapter adapter;
-    private RecyclerView plist;
     LinearLayoutManager ly;
+    private FirebaseAuth fAuth;
+    private RecyclerView plist;
     private FloatingActionButton addParkingFAB;
 
 
@@ -49,7 +48,6 @@ public class ParkingListActivity extends AppCompatActivity {
         });
 
 
-
         plist = findViewById(R.id.Parking_RecyclerView);
         fAuth = FirebaseAuth.getInstance();
 
@@ -65,7 +63,7 @@ public class ParkingListActivity extends AppCompatActivity {
     public void readParkings() {
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid()+"/parkingLots");
+        DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid() + "/parkingLots");
         ref.addValueEventListener(new ValueEventListener() {
 
             @Override

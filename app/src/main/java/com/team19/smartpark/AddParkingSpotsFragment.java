@@ -38,8 +38,8 @@ public class AddParkingSpotsFragment extends DialogFragment {
                     String strSpots = iDsEditText.getText().toString();
                     strSpots = strSpots.replace(" ", "");
                     String[] spots = strSpots.split(",");
-                    for(int i = 0;i<spots.length;i++){
-                        spots[i] = "Id"+spots[i];
+                    for (int i = 0; i < spots.length; i++) {
+                        spots[i] = "Id" + spots[i];
                     }
                     Log.d("TAG", "onClick: " + ParkingSpotsActivity.parkingPath);
                     HashMap<String, Object> hashspot = new HashMap<>();

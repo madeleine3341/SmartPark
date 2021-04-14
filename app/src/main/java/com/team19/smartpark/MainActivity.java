@@ -1,13 +1,11 @@
 package com.team19.smartpark;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -16,18 +14,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.TreeMap;
 
-import javax.annotation.Nullable;
-
 public class MainActivity extends AppCompatActivity {
-    private TextView fullName,email,phone,verifyMsg;
+    private TextView fullName, email, phone, verifyMsg;
     private FirebaseAuth fAuth;
     private FirebaseFirestore fStore;
     private String userId;
@@ -42,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
         phone = findViewById(R.id.profilePhone);
         fullName = findViewById(R.id.profileName);
-        email    = findViewById(R.id.profileEmail);
+        email = findViewById(R.id.profileEmail);
 
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
@@ -54,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid()+"/userInfo");
+        DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid() + "/userInfo");
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -76,16 +68,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
-
-
-
-
     }
+
     public void logout(View view) {
         FirebaseAuth.getInstance().signOut();//logout
-        startActivity(new Intent(getApplicationContext(),LoginActivity.class));
+        startActivity(new Intent(getApplicationContext(), LoginActivity.class));
         finish();
     }
 

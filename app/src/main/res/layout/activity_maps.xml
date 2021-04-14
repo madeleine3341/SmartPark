@@ -52,6 +52,7 @@
             android:backgroundTint="@color/white"
             android:text="Filter"
             android:textSize="10sp" />
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/userButton"
             android:layout_width="wrap_content"
@@ -63,6 +64,7 @@
             android:clickable="true"
             app:backgroundTint="@color/white"
             app:srcCompat="@drawable/ic_baseline_person_24" />
+
         <SearchView
             android:id="@+id/search_bar"
             android:layout_width="364dp"
@@ -93,21 +95,20 @@
             app:backgroundTint="@color/white"
             app:srcCompat="@drawable/ic_baseline_gps_fixed_24" />
 
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
+        <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/coordinator_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:translationZ="90dp"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/coordinator_layout">
+            android:translationZ="90dp">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_gravity="bottom|end"
-                android:layout_margin="0dp"/>
+                android:layout_margin="0dp" />
 
             <fragment
                 android:id="@+id/parallax"
@@ -117,18 +118,18 @@
                 tools:ignore="MissingClass" />
 
             <androidx.core.widget.NestedScrollView
+                android:id="@+id/bottomsheet"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/bottomsheet"
-                android:background="@android:color/white"
                 android:layout_gravity="bottom"
+                android:background="@android:color/white"
+                app:behavior_anchorColor="@color/colorPrimary"
+                app:behavior_anchorHeight="auto"
+                app:behavior_collapsedColor="@android:color/white"
+                app:behavior_content_layout="@layout/custom_content"
+                app:behavior_header_layout="@layout/custom_header"
                 app:behavior_hideable="true"
                 app:behavior_peekHeight="100dp"
-                app:behavior_anchorHeight="auto"
-                app:behavior_header_layout="@layout/custom_header"
-                app:behavior_content_layout="@layout/custom_content"
-                app:behavior_anchorColor="@color/colorPrimary"
-                app:behavior_collapsedColor="@android:color/white"
                 app:layout_behavior="com.team19.smartpark.models.GoogleMapsBottomSheetBehaviour" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
@@ -244,7 +245,6 @@
             app:layout_constraintVertical_bias="0.139" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

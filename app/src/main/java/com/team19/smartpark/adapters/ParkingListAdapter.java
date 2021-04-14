@@ -59,7 +59,7 @@ public class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.
         int total = 0, available = 0, unavailable = 0;
         boolean a = false;
         holder.parkingName.setText(mParkingListName.get(position));
-        if(spots.get(position) != null) {
+        if (spots.get(position) != null) {
             for (Map.Entry<String, Boolean> entry : spots.get(position).entrySet()) {
                 a = entry.getValue();
 

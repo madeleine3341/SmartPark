@@ -14,7 +14,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -52,7 +51,7 @@ public class ParkingSpotsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 FirebaseHelper.removeParkingLots(parkingPath);
-                startActivity(new Intent(getApplicationContext(),ParkingListActivity.class));
+                startActivity(new Intent(getApplicationContext(), ParkingListActivity.class));
                 finish();
             }
         });
@@ -60,12 +59,12 @@ public class ParkingSpotsActivity extends AppCompatActivity {
 
         fAuth = FirebaseAuth.getInstance();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid()+"/parkingLots/"+parkingPath+"/spots");
+        DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid() + "/parkingLots/" + parkingPath + "/spots");
         ref.orderByKey().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 //Log.i("Spots:", String.valueOf(snapshot.getValue()));
-                if(snapshot.getValue() != null) {
+                if (snapshot.getValue() != null) {
                     TreeMap<String, Boolean> spots = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
                     loadList(spots, getSupportFragmentManager(), false);
                 }
@@ -102,12 +101,12 @@ public class ParkingSpotsActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.action_removeParkingSpot) {
 //             If we got here, the user's action was not recognized.
             FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid()+"/parkingLots/"+parkingPath+"/spots");
+            DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid() + "/parkingLots/" + parkingPath + "/spots");
             ref.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     Log.i("snapshot value", String.valueOf(snapshot.getValue()));
-                    if(snapshot.getValue() != null) {
+                    if (snapshot.getValue() != null) {
                         TreeMap<String, Boolean> spots = new TreeMap<>((HashMap<String, Boolean>) snapshot.getValue());
                         loadList(spots, getSupportFragmentManager(), true);
                     }

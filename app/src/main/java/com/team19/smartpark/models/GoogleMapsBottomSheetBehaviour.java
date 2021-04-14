@@ -46,68 +46,29 @@ import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorLayout.Behavior<V> {
 
     /**
-     * Callback for monitoring events about bottom sheets.
-     */
-    public abstract static class BottomSheetCallback {
-
-        /**
-         * Called when the bottom sheet changes its state.
-         *
-         * @param bottomSheet The bottom sheet view.
-         * @param newState    The new state. This will be one of {@link #STATE_DRAGGING},
-         *                    {@link #STATE_SETTLING}, {@link #STATE_EXPANDED},
-         *                    {@link #STATE_COLLAPSED}, or {@link #STATE_HIDDEN}.
-         */
-        public abstract void onStateChanged(@NonNull View bottomSheet, @State int newState);
-
-        /**
-         * Called when the bottom sheet is being dragged.
-         *
-         * @param bottomSheet The bottom sheet view.
-         * @param slideOffset The new offset of this bottom sheet within [-1,1] range. Offset
-         *                    increases as this bottom sheet is moving upward. From 0 to 1 the sheet
-         *                    is between collapsed and expanded states and from -1 to 0 it is
-         *                    between hidden and collapsed states.
-         */
-        public abstract void onSlide(@NonNull View bottomSheet, float slideOffset);
-    }
-
-    /**
      * The bottom sheet is dragging.
      */
     public static final int STATE_DRAGGING = 1;
-
     /**
      * The bottom sheet is settling.
      */
     public static final int STATE_SETTLING = 2;
-
     /**
      * The bottom sheet is expanded.
      */
     public static final int STATE_EXPANDED = 3;
-
     /**
      * The bottom sheet is collapsed.
      */
     public static final int STATE_COLLAPSED = 4;
-
     /**
      * The bottom sheet is hidden.
      */
     public static final int STATE_HIDDEN = 5;
-
     /**
      * The bottom sheet is anchored.
      */
     public static final int STATE_ANCHORED = 6;
-
-    /** @hide */
-    @RestrictTo(LIBRARY_GROUP)
-    @IntDef({STATE_EXPANDED, STATE_COLLAPSED, STATE_DRAGGING, STATE_SETTLING, STATE_HIDDEN, STATE_ANCHORED})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface State {}
-
     /**
      * Peek at 64dp.
      *
@@ -115,11 +76,16 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
      * {@link #getPeekHeight()} will return this when the value is set.</p>
      */
     public static final int PEEK_HEIGHT_AUTO = -1;
-
+    /**
+     * Anchor at the 16:9 ratio keyline of its parent.
+     *
+     * <p>This can be used as a parameter for {@link #setAnchorHeight(int)}.
+     * {@link #getAnchorHeight()} ()} will return this when the value is set.</p>
+     */
+    public static final int ANCHOR_HEIGHT_AUTO = -1;
     private static final float HIDE_THRESHOLD = 0.5f;
-
     private static final float HIDE_FRICTION = 0.1f;
-
+    private final List<View> anchoredViews = new ArrayList<>();
     private float mMaximumVelocity;
 
     private int mPeekHeight;
@@ -127,80 +93,124 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
     private boolean mPeekHeightAuto;
 
     private int mPeekHeightMin;
-
-    /** Anchor at the 16:9 ratio keyline of its parent.
-     *
-     * <p>This can be used as a parameter for {@link #setAnchorHeight(int)}.
-     * {@link #getAnchorHeight()} ()} will return this when the value is set.</p>
-     */
-    public static final int ANCHOR_HEIGHT_AUTO = -1;
-
     private int mAnchorHeight;
-
     private boolean mAnchorHeightAuto;
-
     private int mAnchorHeightMin;
-
     private int mAnchorOffset;
-
     private int mMinOffset;
-
     private int mMaxOffset;
-
     private boolean mHideable;
-
     private boolean mSkipCollapsed;
-
     private int mCurrentColor;
-
     private int mCollapsedColor;
-
     private int mAnchorColor;
-
     private int mCollapsedTextColor;
-
     private int mAnchorTextColor;
-
     @State
     private int mState = STATE_HIDDEN;
-
     private ViewDragHelper mViewDragHelper;
-
     private boolean mIgnoreEvents;
-
     private int mLastNestedScrollDy;
-
     private boolean mNestedScrolled;
-
     private int mParentHeight;
-
     private WeakReference<V> mViewRef;
-
     private WeakReference<View> mNestedScrollingChildRef;
-
     private BottomSheetCallback mCallback;
-
     private VelocityTracker mVelocityTracker;
-
     private int mActivePointerId;
-
     private int mInitialY;
-
     private boolean mTouchingScrollingChild;
-
     private LinearLayout bottomsheet;
-
     private boolean stateFlag = false;
-
     private View headerLayout;
     private List<TextView> headerTextViews;
-
     private View contentLayout;
-
     private View parallax;
-
-    private final List<View> anchoredViews = new ArrayList<>();
     private GoogleMap map;
+    private ValueAnimator colorAnimation;
+    private final ViewDragHelper.Callback mDragCallback = new ViewDragHelper.Callback() {
+
+        @Override
+        public boolean tryCaptureView(View child, int pointerId) {
+            if (mState == STATE_DRAGGING) {
+                return false;
+            }
+            if (mTouchingScrollingChild) {
+                return false;
+            }
+            if (mState == STATE_EXPANDED && mActivePointerId == pointerId) {
+                View scroll = mNestedScrollingChildRef.get();
+                if (scroll != null && scroll.canScrollVertically(-1)) {
+                    // Let the content scroll up
+                    return false;
+                }
+            }
+            return mViewRef != null && mViewRef.get() == child;
+        }
+
+        @Override
+        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
+            dispatchOnSlide(top);
+        }
+
+        @Override
+        public void onViewDragStateChanged(int state) {
+            if (state == ViewDragHelper.STATE_DRAGGING) {
+                setStateInternal(STATE_DRAGGING);
+            }
+        }
+
+        @Override
+        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+            int top;
+            @State int targetState;
+            if (yvel < 0) { // Moving up
+                top = mMinOffset;
+                targetState = STATE_EXPANDED;
+            } else if (mHideable && shouldHide(releasedChild, yvel)) {
+                top = mParentHeight;
+                targetState = STATE_HIDDEN;
+            } else if (yvel == 0.f) {
+                int currentTop = releasedChild.getTop();
+                if (Math.abs(currentTop - mMinOffset) < Math.abs(currentTop - mMaxOffset)) {
+                    top = mMinOffset;
+                    targetState = STATE_EXPANDED;
+                } else {
+                    top = mMaxOffset;
+                    targetState = STATE_COLLAPSED;
+                }
+            } else {
+                top = mMaxOffset;
+                targetState = STATE_COLLAPSED;
+            }
+            if (mViewDragHelper.settleCapturedViewAt(releasedChild.getLeft(), top)) {
+                setStateInternal(STATE_SETTLING);
+                ViewCompat.postOnAnimation(releasedChild,
+                        new SettleRunnable(releasedChild, targetState));
+            } else {
+                setStateInternal(targetState);
+            }
+        }
+
+        @Override
+        public int clampViewPositionVertical(View child, int top, int dy) {
+            return MathUtils.clamp(top, mMinOffset, mHideable ? mParentHeight : mMaxOffset);
+        }
+
+        @Override
+        public int clampViewPositionHorizontal(View child, int left, int dx) {
+            return child.getLeft();
+        }
+
+        @Override
+        public int getViewVerticalDragRange(View child) {
+            if (mHideable) {
+                return mParentHeight - mMinOffset;
+            } else {
+                return mMaxOffset - mMinOffset;
+            }
+        }
+    };
 
     /**
      * Default constructor for instantiating GoogleMapsBottomSheetBehaviors.
@@ -284,6 +294,27 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
 
         ViewConfiguration configuration = ViewConfiguration.get(context);
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
+    }
+
+    /**
+     * A utility function to get the {@link GoogleMapsBottomSheetBehaviour} associated with the {@code view}.
+     *
+     * @param view The {@link View} with {@link GoogleMapsBottomSheetBehaviour}.
+     * @return The {@link GoogleMapsBottomSheetBehaviour} associated with the {@code view}.
+     */
+    @SuppressWarnings("unchecked")
+    public static <V extends View> GoogleMapsBottomSheetBehaviour<V> from(V view) {
+        ViewGroup.LayoutParams params = view.getLayoutParams();
+        if (!(params instanceof CoordinatorLayout.LayoutParams)) {
+            throw new IllegalArgumentException("The view is not a child of CoordinatorLayout");
+        }
+        CoordinatorLayout.Behavior behavior = ((CoordinatorLayout.LayoutParams) params)
+                .getBehavior();
+        if (!(behavior instanceof GoogleMapsBottomSheetBehaviour)) {
+            throw new IllegalArgumentException(
+                    "The view is not associated with GoogleMapsBottomSheetBehavior");
+        }
+        return (GoogleMapsBottomSheetBehaviour<V>) behavior;
     }
 
     @Override
@@ -553,6 +584,17 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
     }
 
     /**
+     * Gets the height of the bottom sheet when it is collapsed.
+     *
+     * @return The height of the collapsed bottom sheet in pixels, or {@link #PEEK_HEIGHT_AUTO}
+     * if the sheet is configured to peek automatically at 64dp
+     * @attr ref R.styleable#GoogleMapsBottomSheetBehavior_Layout_behavior_peekHeight
+     */
+    public final int getPeekHeight() {
+        return mPeekHeightAuto ? PEEK_HEIGHT_AUTO : mPeekHeight;
+    }
+
+    /**
      * Sets the height of the bottom sheet when it is collapsed.
      *
      * @param peekHeight The height of the collapsed bottom sheet in pixels, or
@@ -582,14 +624,13 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
     }
 
     /**
-     * Gets the height of the bottom sheet when it is collapsed.
+     * Gets the offset of the bottom sheet when it is anchored.
+     * Useful for setting the height of your parallax.
      *
-     * @return The height of the collapsed bottom sheet in pixels, or {@link #PEEK_HEIGHT_AUTO}
-     *         if the sheet is configured to peek automatically at 64dp
-     * @attr ref R.styleable#GoogleMapsBottomSheetBehavior_Layout_behavior_peekHeight
+     * @return The offset of the anchored bottom sheet from the top of its parent in pixels.
      */
-    public final int getPeekHeight() {
-        return mPeekHeightAuto ? PEEK_HEIGHT_AUTO : mPeekHeight;
+    public final int getAnchorOffset() {
+        return mAnchorOffset;
     }
 
     /**
@@ -603,13 +644,14 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
     }
 
     /**
-     * Gets the offset of the bottom sheet when it is anchored.
-     * Useful for setting the height of your parallax.
+     * Gets the height of the bottom sheet when it is anchored.
      *
-     * @return The offset of the anchored bottom sheet from the top of its parent in pixels.
+     * @return The height of the anchored bottom sheet in pixels, or {@link #ANCHOR_HEIGHT_AUTO}
+     * if the sheet is configured to anchor automatically at 16:9 ratio keyline
+     * @attr ref R.styleable#GoogleMapsBottomSheetBehavior_Layout_behavior_anchorOffset
      */
-    public final int getAnchorOffset() {
-        return mAnchorOffset;
+    public final int getAnchorHeight() {
+        return mAnchorHeightAuto ? ANCHOR_HEIGHT_AUTO : mAnchorHeight;
     }
 
     /**
@@ -642,39 +684,28 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
         }
     }
 
-    /**
-     * Gets the height of the bottom sheet when it is anchored.
-     *
-     * @return The height of the anchored bottom sheet in pixels, or {@link #ANCHOR_HEIGHT_AUTO}
-     *         if the sheet is configured to anchor automatically at 16:9 ratio keyline
-     * @attr ref R.styleable#GoogleMapsBottomSheetBehavior_Layout_behavior_anchorOffset
-     */
-    public final int getAnchorHeight() {
-        return mAnchorHeightAuto ? ANCHOR_HEIGHT_AUTO : mAnchorHeight;
+    public int getCollapsedColor() {
+        return mCollapsedColor;
     }
 
     public void setCollapsedColor(int collapsedColor) {
         this.mCollapsedColor = collapsedColor;
     }
 
-    public int getCollapsedColor() {
-        return mCollapsedColor;
+    public int getAnchorColor() {
+        return mAnchorColor;
     }
 
     public void setAnchorColor(int anchorColor) {
         this.mAnchorColor = anchorColor;
     }
 
-    public int getAnchorColor() {
-        return mAnchorColor;
+    public int getCollapsedTextColor() {
+        return mCollapsedTextColor;
     }
 
     public void setCollapsedTextColor(int collapsedTextColor) {
         this.mCollapsedTextColor = collapsedTextColor;
-    }
-
-    public int getCollapsedTextColor() {
-        return mCollapsedTextColor;
     }
 
     public int getAnchorTextColor() {
@@ -683,16 +714,6 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
 
     public void setAnchorTextColor(int anchorTextColor) {
         this.mAnchorTextColor = anchorTextColor;
-    }
-
-    /**
-     * Sets whether this bottom sheet can hide when it is swiped down.
-     *
-     * @param hideable {@code true} to make this bottom sheet hideable.
-     * @attr ref R.styleable#GoogleMapsBottomSheetBehavior_Layout_behavior_hideable
-     */
-    public void setHideable(boolean hideable) {
-        mHideable = hideable;
     }
 
     /**
@@ -706,14 +727,13 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
     }
 
     /**
-     * Sets whether this bottom sheet should skip the collapsed state when it is being hidden
-     * after it is expanded once. Setting this to true has no effect unless the sheet is hideable.
+     * Sets whether this bottom sheet can hide when it is swiped down.
      *
-     * @param skipCollapsed True if the bottom sheet should skip the collapsed state.
-     * @attr ref R.styleable#GoogleMapsBottomSheetBehavior_Layout_behavior_skipCollapsed
+     * @param hideable {@code true} to make this bottom sheet hideable.
+     * @attr ref R.styleable#GoogleMapsBottomSheetBehavior_Layout_behavior_hideable
      */
-    public void setSkipCollapsed(boolean skipCollapsed) {
-        mSkipCollapsed = skipCollapsed;
+    public void setHideable(boolean hideable) {
+        mHideable = hideable;
     }
 
     /**
@@ -727,13 +747,26 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
         return mSkipCollapsed;
     }
 
+    /**
+     * Sets whether this bottom sheet should skip the collapsed state when it is being hidden
+     * after it is expanded once. Setting this to true has no effect unless the sheet is hideable.
+     *
+     * @param skipCollapsed True if the bottom sheet should skip the collapsed state.
+     * @attr ref R.styleable#GoogleMapsBottomSheetBehavior_Layout_behavior_skipCollapsed
+     */
+    public void setSkipCollapsed(boolean skipCollapsed) {
+        mSkipCollapsed = skipCollapsed;
+    }
+
+    @Nullable
+    public View getParallax() {
+        return parallax;
+    }
+
     public void setParallax(View view) {
         parallax = view;
         parallax.setVisibility(View.INVISIBLE);
     }
-
-    @Nullable
-    public View getParallax() { return parallax; }
 
     @Nullable
     public View getHeaderLayout() {
@@ -747,9 +780,10 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
 
     /**
      * Anchor a view to the top of the bottomsheet/parallax.
-     * @throws IllegalStateException when the view given does not have
-     * {@link ViewGroup.LayoutParams} of type {@link CoordinatorLayout.LayoutParams}
+     *
      * @param view View to be anchored.
+     * @throws IllegalStateException when the view given does not have
+     *                               {@link ViewGroup.LayoutParams} of type {@link CoordinatorLayout.LayoutParams}
      */
     public void anchorView(View view) {
         if (!(view.getLayoutParams() instanceof CoordinatorLayout.LayoutParams)) {
@@ -760,17 +794,17 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
 
     /**
      * Unanchor a view from the bottomsheet, if it is anchored.
+     *
      * @param view View to be unanchored.
      */
     public void unanchorView(View view) {
-        if (anchoredViews.contains(view)) {
-            anchoredViews.remove(view);
-        }
+        anchoredViews.remove(view);
     }
 
     /**
      * Anchor the map to the bottomsheet. This will adjust the padding of the map into view
      * as the bottomsheet moves towards the top of the screen. This keeps the Google logo in view.
+     *
      * @param map
      */
     public void anchorMap(GoogleMap map) {
@@ -788,6 +822,17 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
      */
     public void setBottomSheetCallback(BottomSheetCallback callback) {
         mCallback = callback;
+    }
+
+    /**
+     * Gets the current state of the bottom sheet.
+     *
+     * @return One of {@link #STATE_EXPANDED}, {@link #STATE_COLLAPSED}, {@link #STATE_DRAGGING},
+     * {@link #STATE_ANCHORED} and {@link #STATE_SETTLING}.
+     */
+    @State
+    public final int getState() {
+        return mState;
     }
 
     /**
@@ -826,17 +871,6 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
         }
     }
 
-    /**
-     * Gets the current state of the bottom sheet.
-     *
-     * @return One of {@link #STATE_EXPANDED}, {@link #STATE_COLLAPSED}, {@link #STATE_DRAGGING},
-     * {@link #STATE_ANCHORED} and {@link #STATE_SETTLING}.
-     */
-    @State
-    public final int getState() {
-        return mState;
-    }
-
     private void setStateInternal(@State int state) {
         if (mState == state) {
             return;
@@ -852,7 +886,7 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
         }
         if (state == STATE_COLLAPSED) {
             updateHeaderColor(mCollapsedColor, mCollapsedTextColor);
-        } else if (mViewRef.get().getTop() < mMaxOffset  && !stateFlag) {
+        } else if (mViewRef.get().getTop() < mMaxOffset && !stateFlag) {
             updateHeaderColor(mAnchorColor, mAnchorTextColor);
         }
         stateFlag = false;
@@ -925,90 +959,6 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
         }
     }
 
-    private final ViewDragHelper.Callback mDragCallback = new ViewDragHelper.Callback() {
-
-        @Override
-        public boolean tryCaptureView(View child, int pointerId) {
-            if (mState == STATE_DRAGGING) {
-                return false;
-            }
-            if (mTouchingScrollingChild) {
-                return false;
-            }
-            if (mState == STATE_EXPANDED && mActivePointerId == pointerId) {
-                View scroll = mNestedScrollingChildRef.get();
-                if (scroll != null && scroll.canScrollVertically(-1)) {
-                    // Let the content scroll up
-                    return false;
-                }
-            }
-            return mViewRef != null && mViewRef.get() == child;
-        }
-
-        @Override
-        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
-            dispatchOnSlide(top);
-        }
-
-        @Override
-        public void onViewDragStateChanged(int state) {
-            if (state == ViewDragHelper.STATE_DRAGGING) {
-                setStateInternal(STATE_DRAGGING);
-            }
-        }
-
-        @Override
-        public void onViewReleased(View releasedChild, float xvel, float yvel) {
-            int top;
-            @State int targetState;
-            if (yvel < 0) { // Moving up
-                top = mMinOffset;
-                targetState = STATE_EXPANDED;
-            } else if (mHideable && shouldHide(releasedChild, yvel)) {
-                top = mParentHeight;
-                targetState = STATE_HIDDEN;
-            } else if (yvel == 0.f) {
-                int currentTop = releasedChild.getTop();
-                if (Math.abs(currentTop - mMinOffset) < Math.abs(currentTop - mMaxOffset)) {
-                    top = mMinOffset;
-                    targetState = STATE_EXPANDED;
-                } else {
-                    top = mMaxOffset;
-                    targetState = STATE_COLLAPSED;
-                }
-            } else {
-                top = mMaxOffset;
-                targetState = STATE_COLLAPSED;
-            }
-            if (mViewDragHelper.settleCapturedViewAt(releasedChild.getLeft(), top)) {
-                setStateInternal(STATE_SETTLING);
-                ViewCompat.postOnAnimation(releasedChild,
-                        new SettleRunnable(releasedChild, targetState));
-            } else {
-                setStateInternal(targetState);
-            }
-        }
-
-        @Override
-        public int clampViewPositionVertical(View child, int top, int dy) {
-            return MathUtils.clamp(top, mMinOffset, mHideable ? mParentHeight : mMaxOffset);
-        }
-
-        @Override
-        public int clampViewPositionHorizontal(View child, int left, int dx) {
-            return child.getLeft();
-        }
-
-        @Override
-        public int getViewVerticalDragRange(View child) {
-            if (mHideable) {
-                return mParentHeight - mMinOffset;
-            } else {
-                return mMaxOffset - mMinOffset;
-            }
-        }
-    };
-
     private void dispatchOnSlide(int top) {
         View bottomSheet = mViewRef.get();
 
@@ -1022,7 +972,7 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
         // move the parallax relative to the bottomsheet and update colors
         if (parallax != null) {
             int height = parallax.getHeight();
-            float y  = parallax.getY();
+            float y = parallax.getY();
             if (slideOffset <= 0) {
                 updateHeaderColor(mCollapsedColor, mCollapsedTextColor);
                 parallax.setVisibility(View.INVISIBLE);
@@ -1070,73 +1020,6 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
     private int getPeekHeightMin() {
         return mPeekHeightMin;
     }
-
-    private class SettleRunnable implements Runnable {
-
-        private final View mView;
-
-        @State
-        private final int mTargetState;
-
-        SettleRunnable(View view, @State int targetState) {
-            mView = view;
-            mTargetState = targetState;
-        }
-
-        @Override
-        public void run() {
-            if (mViewDragHelper != null && mViewDragHelper.continueSettling(true)) {
-                ViewCompat.postOnAnimation(mView, this);
-            } else {
-                setStateInternal(mTargetState);
-            }
-        }
-    }
-
-    protected static class SavedState extends AbsSavedState {
-        @State
-        final int state;
-
-        public SavedState(Parcel source) {
-            this(source, null);
-        }
-
-        public SavedState(Parcel source, ClassLoader loader) {
-            super(source, loader);
-            //noinspection ResourceType
-            state = source.readInt();
-        }
-
-        public SavedState(Parcelable superState, @State int state) {
-            super(superState);
-            this.state = state;
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeInt(state);
-        }
-
-        public static final ClassLoaderCreator<SavedState> CREATOR = new ClassLoaderCreator<SavedState>() {
-            @Override
-            public SavedState createFromParcel(Parcel in, ClassLoader loader) {
-                return new SavedState(in, loader);
-            }
-
-            @Override
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in, null);
-            }
-
-            @Override
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
-    }
-
-    private ValueAnimator colorAnimation;
 
     private void updateHeaderColor(int newBackgroundColor, int newTextColor) {
         if (mCurrentColor != newBackgroundColor) {
@@ -1195,24 +1078,103 @@ public class GoogleMapsBottomSheetBehaviour<V extends View> extends CoordinatorL
     }
 
     /**
-     * A utility function to get the {@link GoogleMapsBottomSheetBehaviour} associated with the {@code view}.
-     *
-     * @param view The {@link View} with {@link GoogleMapsBottomSheetBehaviour}.
-     * @return The {@link GoogleMapsBottomSheetBehaviour} associated with the {@code view}.
+     * @hide
      */
-    @SuppressWarnings("unchecked")
-    public static <V extends View> GoogleMapsBottomSheetBehaviour<V> from(V view) {
-        ViewGroup.LayoutParams params = view.getLayoutParams();
-        if (!(params instanceof CoordinatorLayout.LayoutParams)) {
-            throw new IllegalArgumentException("The view is not a child of CoordinatorLayout");
+    @RestrictTo(LIBRARY_GROUP)
+    @IntDef({STATE_EXPANDED, STATE_COLLAPSED, STATE_DRAGGING, STATE_SETTLING, STATE_HIDDEN, STATE_ANCHORED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface State {
+    }
+
+    /**
+     * Callback for monitoring events about bottom sheets.
+     */
+    public abstract static class BottomSheetCallback {
+
+        /**
+         * Called when the bottom sheet changes its state.
+         *
+         * @param bottomSheet The bottom sheet view.
+         * @param newState    The new state. This will be one of {@link #STATE_DRAGGING},
+         *                    {@link #STATE_SETTLING}, {@link #STATE_EXPANDED},
+         *                    {@link #STATE_COLLAPSED}, or {@link #STATE_HIDDEN}.
+         */
+        public abstract void onStateChanged(@NonNull View bottomSheet, @State int newState);
+
+        /**
+         * Called when the bottom sheet is being dragged.
+         *
+         * @param bottomSheet The bottom sheet view.
+         * @param slideOffset The new offset of this bottom sheet within [-1,1] range. Offset
+         *                    increases as this bottom sheet is moving upward. From 0 to 1 the sheet
+         *                    is between collapsed and expanded states and from -1 to 0 it is
+         *                    between hidden and collapsed states.
+         */
+        public abstract void onSlide(@NonNull View bottomSheet, float slideOffset);
+    }
+
+    protected static class SavedState extends AbsSavedState {
+        public static final ClassLoaderCreator<SavedState> CREATOR = new ClassLoaderCreator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel in, ClassLoader loader) {
+                return new SavedState(in, loader);
+            }
+
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in, null);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+        @State
+        final int state;
+
+        public SavedState(Parcel source) {
+            this(source, null);
         }
-        CoordinatorLayout.Behavior behavior = ((CoordinatorLayout.LayoutParams) params)
-                .getBehavior();
-        if (!(behavior instanceof GoogleMapsBottomSheetBehaviour)) {
-            throw new IllegalArgumentException(
-                    "The view is not associated with GoogleMapsBottomSheetBehavior");
+
+        public SavedState(Parcel source, ClassLoader loader) {
+            super(source, loader);
+            //noinspection ResourceType
+            state = source.readInt();
         }
-        return (GoogleMapsBottomSheetBehaviour<V>) behavior;
+
+        public SavedState(Parcelable superState, @State int state) {
+            super(superState);
+            this.state = state;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(state);
+        }
+    }
+
+    private class SettleRunnable implements Runnable {
+
+        private final View mView;
+
+        @State
+        private final int mTargetState;
+
+        SettleRunnable(View view, @State int targetState) {
+            mView = view;
+            mTargetState = targetState;
+        }
+
+        @Override
+        public void run() {
+            if (mViewDragHelper != null && mViewDragHelper.continueSettling(true)) {
+                ViewCompat.postOnAnimation(mView, this);
+            } else {
+                setStateInternal(mTargetState);
+            }
+        }
     }
 }
 

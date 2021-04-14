@@ -2,7 +2,6 @@ package com.team19.smartpark.models;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Parking {
@@ -18,21 +17,21 @@ public class Parking {
     public Parking() {
     }
 
-    public Parking(String address, double lat, double lng, String name, HashMap<String, Boolean> spots, boolean status,double fees) {
+    public Parking(String address, double lat, double lng, String name, HashMap<String, Boolean> spots, boolean status, double fees) {
         this.address = address;
         this.lat = lat;
         this.lng = lng;
         this.name = name;
         this.spots = spots;
         this.status = status;
-        this.fees=fees;
+        this.fees = fees;
     }
 
     @Override
     public String toString() {
         return "Parking{" +
                 "address='" + address + '\'' +
-                "Operating Hours='" + operatingHour +'\'' +
+                "Operating Hours='" + operatingHour + '\'' +
                 ", lat=" + lat +
                 ", lng=" + lng +
                 ", name='" + name + '\'' +

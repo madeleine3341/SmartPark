@@ -21,11 +21,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartPark"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Register"
+        <activity
+            android:name=".Register"
             android:parentActivityName=".MapsActivity" />
-        <activity android:name=".LoginActivity"
+        <activity
+            android:name=".LoginActivity"
             android:parentActivityName=".Register" />
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".MainActivity"
             android:parentActivityName=".MapsActivity" />
         <activity
             android:name=".ParkingListActivity"
@@ -56,9 +59,9 @@
 
         <activity
             android:name=".MapsActivity"
-            android:windowSoftInputMode="adjustNothing"
+            android:label="@string/title_activity_maps"
 
-            android:label="@string/title_activity_maps">
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
