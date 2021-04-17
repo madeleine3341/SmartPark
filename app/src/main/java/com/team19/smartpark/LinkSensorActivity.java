@@ -41,22 +41,23 @@ public class LinkSensorActivity extends AppCompatActivity {
     private TextView passwordText;
     private Button configButton;
     private ScanResult espwifi;
+    //set up the wifi scanner
     BroadcastReceiver wifiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive: new scan");
             boolean success = intent.getBooleanExtra(
                     WifiManager.EXTRA_RESULTS_UPDATED, false);
-            Log.d(TAG, "onReceive: " + success);
             List<ScanResult> results = wifiManager.getScanResults();
             for (ScanResult result :
                     results) {
-                Log.d(TAG, "onReceive: " + result.SSID);
             }
+            //filter wifi results with only ESP compatible ones else if no result put null
             espwifi = results.stream()
                     .filter(scanResult -> scanResult.SSID.startsWith("ESP")).findAny().orElse(null);
-            Log.d(TAG, "onReceive: " + espwifi);
+
+            // if a result is found
             if (espwifi != null) {
+                // stop scanning and prompt the user to input the wifi credentials to be passed
                 unregisterReceiver(this);
                 instructionText.setText("Device found ! \n Please enter the wifi credentials to configure your sensor");
                 ssidText.setVisibility(View.VISIBLE);
@@ -73,13 +74,11 @@ public class LinkSensorActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_link_sensor);
-
+        // get the parking spot path from previous activity from the intent
         Intent intent = getIntent();
         parkingPath = intent.getStringExtra("parkingPath");
-        Log.d(TAG, "onCreate: " + parkingPath);
-
+        // bind all layout objects to java objects
         spinner = findViewById(R.id.progressBar);
-
         instructionText = findViewById(R.id.instructionText);
         ssidText = findViewById(R.id.ssidField);
         ssidText.setVisibility(View.GONE);
@@ -87,6 +86,8 @@ public class LinkSensorActivity extends AppCompatActivity {
         passwordText.setVisibility(View.GONE);
         configButton = findViewById(R.id.configButton);
         configButton.setVisibility(View.GONE);
+
+        // when the link button is pressed send the config to the sensor
         configButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,8 +119,18 @@ public class LinkSensorActivity extends AppCompatActivity {
         Log.d(TAG, "onDestroy: network session ended");
     }
 
+
+    /**
+     * Establish connection with the ESP board and send to it the config file
+     *
+     * @param esp32
+     * @param parkingPath
+     * @param pSSID
+     * @param pPassword
+     */
     private void sendConfig(ScanResult esp32, String parkingPath, String pSSID, String pPassword) {
         boolean done = false;
+        //connect to the ESP wifi securely
         wifiManager = (WifiManager)
                 getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         Log.d(TAG, "scanSuccess: found potential esp");
@@ -128,41 +139,44 @@ public class LinkSensorActivity extends AppCompatActivity {
         builder.setWpa2Passphrase("welcome123");
 
         WifiNetworkSpecifier wifiNetworkSpecifier = builder.build();
-
+        // set up the netweork once connected
         NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
         networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
         networkRequestBuilder.setNetworkSpecifier(wifiNetworkSpecifier);
         NetworkRequest networkRequest = networkRequestBuilder.build();
 
         cm = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        // when the network is available we send the config through an http post req
         networkCallback = new ConnectivityManager.NetworkCallback() {
             @Override
             public void onAvailable(@NonNull Network network) {
                 HttpURLConnection urlConnection = null;
+                // set up the http requestion and connection
                 try {
-                    Log.d(TAG, "onAvailable: sending config");
                     urlConnection = (HttpURLConnection) network.openConnection(new URL("http://192.168.4.1/config"));//esp);
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setRequestProperty("Content-Type", "application/json; utf-8");
                     urlConnection.setRequestProperty("Accept", "*/*");
                     urlConnection.setDoOutput(true);
+                    //create the json object with all the config settings to be sent
                     JSONObject jsonInput = new JSONObject();
                     jsonInput.put("config", true);
                     jsonInput.put("ssid", pSSID);
                     jsonInput.put("password", pPassword);
                     jsonInput.put("path", parkingPath);
                     String jsonString = jsonInput.toString().replace("\\/", "/");
-                    Log.d(TAG, "onAvailable: " + jsonString);
+                    // send (post) the config
                     urlConnection.connect();
+
+                    //write the body of the request
                     try (OutputStream os = urlConnection.getOutputStream()) {
-                        Log.d(TAG, "onAvailable: sending");
                         byte[] input = jsonString.getBytes(StandardCharsets.UTF_8);
                         os.write(input, 0, input.length);
-                        Log.d(TAG, "onAvailable: should be sent now");
                     }
-
-                    Log.d(TAG, "onAvailable: " + urlConnection.getResponseCode());
+                    // get the response of the request
+                    // if response is successfull
                     if (urlConnection.getResponseCode() == 200) {
+                        //run on UI thread to let the user know  config sent successfully
                         runOnUiThread(() -> {
                             instructionText.setText("Sensor Configured successfully");
                             spinner.setVisibility(View.GONE);
@@ -171,6 +185,7 @@ public class LinkSensorActivity extends AppCompatActivity {
                             configButton.setVisibility(View.GONE);
                         });
                         cm.unregisterNetworkCallback(networkCallback);
+                        //if request is not successful
                     } else if (urlConnection.getResponseCode() == 400) {
                         runOnUiThread(() -> {
                             instructionText.setText("You entered invalid credentials");
@@ -186,7 +201,7 @@ public class LinkSensorActivity extends AppCompatActivity {
             }
         };
 
-
+        //bin network call back
         cm.requestNetwork(networkRequest, networkCallback);
     }
 

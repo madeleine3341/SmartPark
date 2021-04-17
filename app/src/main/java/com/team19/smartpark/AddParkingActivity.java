@@ -51,6 +51,7 @@ public class AddParkingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // bind all layout items to java objects
         setContentView(R.layout.activity_parking);
         ActionBar ab;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -59,16 +60,17 @@ public class AddParkingActivity extends AppCompatActivity {
         addressTextView = findViewById(R.id.addressTextView);
         spotsTextView = findViewById(R.id.spotsTextView);
         selectLocationBtn = findViewById(R.id.selectionLocationbtn);
-        selectLocationBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new SelectionLocationMapFragment().show(getSupportFragmentManager(), null);
-            }
-        });
         feesTextView = findViewById(R.id.feesTextView);
         openTextView = findViewById(R.id.openTextView);
         closeTextView = findViewById(R.id.closeTextView);
-
+        selectLocationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // launch map fragmnent to select location of the parking in the map
+                new SelectionLocationMapFragment().show(getSupportFragmentManager(), null);
+            }
+        });
+        // set hint for opening and closing hours time pickers pragramatically
         String udata = "Select Opening Hour";
         SpannableString content = new SpannableString(udata);
         content.setSpan(new UnderlineSpan(), 0, udata.length(), 0);
@@ -96,11 +98,13 @@ public class AddParkingActivity extends AppCompatActivity {
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // get all data from other fields
                 String name = nameTextView.getText().toString();
                 String address = addressTextView.getText().toString();
                 String fee = feesTextView.getText().toString();
                 double fees = Double.parseDouble(fee);
 
+                //process and transform all fields
                 String strSpots = spotsTextView.getText().toString();
                 strSpots = strSpots.replace(" ", "");
                 String[] spots = strSpots.split(",");
@@ -116,8 +120,10 @@ public class AddParkingActivity extends AppCompatActivity {
                     hashspot.put(spot, true);
                 }
 
-
+                // validate all fields
+                // if all fields content are valid
                 if (!name.isEmpty() && !address.isEmpty() && locationSelected) {
+                    //create new parking object and fill it with the user input data
                     Parking parking = new Parking();
                     parking.address = address;
                     parking.name = name;
@@ -125,6 +131,7 @@ public class AddParkingActivity extends AppCompatActivity {
                     parking.spots = hashspot;
                     parking.setLatLng(parkingLocation);
                     parking.fees = fees;
+                    //push the parking to the Firebase database
                     FirebaseHelper.addParkingLots(parking);
                     Toast.makeText(getApplicationContext(), "Parking added successfully", Toast.LENGTH_SHORT).show();
                     finish();
@@ -135,6 +142,7 @@ public class AddParkingActivity extends AppCompatActivity {
 
     }
 
+    //function to be invoked in the map location fragment to set the parking location fields in this class
     public void setParkingLocation(LatLng latLng) {
         parkingLocation = latLng;
         locationSelected = true;

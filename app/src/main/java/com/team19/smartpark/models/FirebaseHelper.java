@@ -15,6 +15,12 @@ import java.util.Map;
 
 public class FirebaseHelper {
 
+
+    /**
+     * @return
+     * @deprecated Not working, only here for reference purposes on how to return a list of Parking from the Firebase async API
+     */
+    @Deprecated
     public static ArrayList<Parking> getParkingLots() {
         DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
         Task<DataSnapshot> dataSnapshotTask = mDatabase.get();
@@ -35,25 +41,41 @@ public class FirebaseHelper {
 
     }
 
-    public static HashMap<String, Boolean> getParkingSpots(Parking parking) {
-        return parking.spots;
-    }
 
+    /**
+     * Add a parking object to the Firebase RTDB
+     *
+     * @param parking
+     */
     public static void addParkingLots(Parking parking) {
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
-        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid() + "/parkingLots").child(parking.name).setValue(parking);
+        // in the parking lots database reference, push a new node for a new parking
+        FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid() + "/parkingLots").push().setValue(parking);
 
     }
 
+    /**
+     * Add parking spots to a particular Parking lot
+     *
+     * @param parkingId
+     * @param spots
+     */
     public static void addParkingSpot(String parkingId, Map<String, Object> spots) {
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        // in the node reference of the parking, update the children by adding the new spots
         FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid() + "/parkingLots/" + parkingId).child("spots").updateChildren(spots);
         Log.d("TAG", "addParkingSpot: ");
 
     }
 
-    public static void removeParkingLots(String parkingLotId) {
+    /**
+     * Remove a particular Parking lot by ID
+     *
+     * @param parkingLotId
+     */
+    public static void removeParkingLot(String parkingLotId) {
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
+        // remove the node of the parking
         FirebaseDatabase.getInstance().getReference(fAuth.getCurrentUser().getUid() + "/parkingLots/" + parkingLotId).removeValue();
 
     }

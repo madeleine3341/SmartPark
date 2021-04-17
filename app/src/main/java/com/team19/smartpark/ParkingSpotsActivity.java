@@ -50,7 +50,7 @@ public class ParkingSpotsActivity extends AppCompatActivity {
         removeParkingLotButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseHelper.removeParkingLots(parkingPath);
+                FirebaseHelper.removeParkingLot(parkingPath);
                 startActivity(new Intent(getApplicationContext(), ParkingListActivity.class));
                 finish();
             }

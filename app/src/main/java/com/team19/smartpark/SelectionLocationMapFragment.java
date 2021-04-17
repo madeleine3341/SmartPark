@@ -43,6 +43,7 @@ public class SelectionLocationMapFragment extends DialogFragment implements OnMa
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        //set up the map fragmnet
         super.onViewCreated(view, savedInstanceState);
         FragmentManager fm = getChildFragmentManager();
         SupportMapFragment mapFragment = (SupportMapFragment) fm.findFragmentByTag("mapFragment");
@@ -55,6 +56,7 @@ public class SelectionLocationMapFragment extends DialogFragment implements OnMa
         }
         mapFragment.getMapAsync(this);
 
+        //send the latlng location back to parent activity through function call
         selectLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,7 +77,7 @@ public class SelectionLocationMapFragment extends DialogFragment implements OnMa
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(selectedLatLng);
         currentMarker = mMap.addMarker(markerOptions);
-
+        // when map is clicked we update the marker location and the lat lng field to be later passed to the parent activity through a function call
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -83,7 +85,5 @@ public class SelectionLocationMapFragment extends DialogFragment implements OnMa
                 selectedLatLng = latLng;
             }
         });
-//        markerOptions.title("Current Position");
-//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
     }
 }
