@@ -28,6 +28,7 @@ public class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.
     ArrayList<String> id = new ArrayList<>();
     Context ctx;
 
+    //constructor
     public ParkingListAdapter(TreeMap<String, Parking> Keyparking, Context ctx) {
 
         this.mKeys = Keyparking;
@@ -35,9 +36,8 @@ public class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.
         this.inflater = LayoutInflater.from(ctx);
         this.ctx = ctx;
     }
-
+    // extract parking name, spots, id from node of parkings
     public void SetArrays(TreeMap<String, Parking> Keyparking) {
-
         for (Map.Entry<String, Parking> parking : Keyparking.entrySet()) {
             mParkingListName.add(parking.getValue().getName());
             spots.add(parking.getValue().getSpots());//get one spot
@@ -53,12 +53,16 @@ public class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.
         return new ViewHolder(v);
     }
 
+    //fill unused view holders with data
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         int total = 0, available = 0, unavailable = 0;
         boolean a = false;
+
+        //parking name
         holder.parkingName.setText(mParkingListName.get(position));
+        // find number of occupied spots
         if (spots.get(position) != null) {
             for (Map.Entry<String, Boolean> entry : spots.get(position).entrySet()) {
                 a = entry.getValue();
@@ -71,7 +75,9 @@ public class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.
                 total = available + unavailable;
             }
         }
-        holder.parkingStatus.setText(available + "/" + total + " available");
+        //parking occupied spots
+        holder.parkingStatus.setText(unavailable + "/" + total + " occupied");
+        //when item clicked send id to ParkingSpotsActivity and go to ParkingSpotsActivity
         holder.card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
