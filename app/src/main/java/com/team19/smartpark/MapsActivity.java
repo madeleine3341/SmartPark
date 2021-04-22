@@ -294,8 +294,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        //Marker Bottom Sheet section********
-//        clickedMarkerCoordinates = new com.google.android.gms.maps.model.LatLng(0,0);
+        //Marker Bottom Sheet section
         floatingAb = findViewById(R.id.fab);
 
         SupportStreetViewPanoramaFragment streetViewPanoramaFragment = (SupportStreetViewPanoramaFragment) getSupportFragmentManager().findFragmentById(R.id.parallax);
@@ -375,9 +374,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public boolean onMarkerClick(com.google.android.gms.maps.model.Marker marker) {
                 behavior.setState(GoogleMapsBottomSheetBehaviour.STATE_COLLAPSED);
                 behavior.setHideable(false);
-//                clickedMarkerCoordinates = new com.google.android.gms.maps.model.LatLng(0,0);
                 mMap.animateCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLng(marker.getPosition()));
-//                clickedMarkerCoordinates = marker.getPosition();
+
                 //finding the right parking in parking list using the marker title
                 HashMap<String, Boolean> temp = new HashMap<String, Boolean>();
                 Parking targetParking = new Parking("N/A", 0, 0, "N/A", temp, false, 0);
@@ -397,6 +395,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 vRating = findViewById(R.id.markerSheetRating);
                 vStatus = findViewById(R.id.markerSheetStatus);
 
+                //Finds first available parking spot and displays it on bottom sheet. If all spots are taken, will display full.
                 boolean availableExists = false;
                 Iterator it = targetParking.getSpots().entrySet().iterator();
                 while (it.hasNext()) {
@@ -413,7 +412,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         vRecommended.setTextColor(Color.BLACK);
                     }
                 }
-
+                //Checks status of parking lot and displays open or closed accordingly.
                 if (targetParking.isStatus()) {
                     vStatus.setText("Open");
                     vStatus.setTextColor(Color.GREEN);
@@ -422,6 +421,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     vStatus.setTextColor(Color.RED);
                 }
 
+                //System to add ratings for a parking space. Average rating and number of ratings is given, then reviews are generated accordingly and put into an arraylist.
                 double rating = 4;
                 int numOfRatings = 5;
                 double[] ratings = new double[numOfRatings];
@@ -446,7 +446,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
 
                 ListView lv = findViewById(R.id.markerSheetReviews);
-
+                //Array list of reviews is displayed in a listview on the marker Bottom Sheet
                 ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                         getApplicationContext(),
                         android.R.layout.simple_list_item_1,
@@ -454,6 +454,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 lv.setAdapter(arrayAdapter);
 
+                //information from the found parking lot such as coordinates, name, fee and address are then displayed onto the bottom sheet. The streetview is also linked to the markers position.
                 vRating.setText("4/5");
                 vRating.setTextColor(Color.BLACK);
                 vCoordinates.setText(targetParking.getLat() + "," + targetParking.getLng());
@@ -482,7 +483,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
     }
-
+    //function when a streetview is created. This streetview is then assigned to the one found on the marker bottom sheet.
     @Override
     public void onStreetViewPanoramaReady(StreetViewPanorama streetViewPanorama) {
         streetPan = streetViewPanorama;
