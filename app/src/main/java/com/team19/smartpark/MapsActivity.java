@@ -101,11 +101,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     FirebaseAuth fAuth;
     FloatingActionButton floatingAb;
     private DatabaseReference mDatabase;
-    private FirebaseFirestore fStore;
     private GoogleMap mMap;
     private SearchView searchView;
-    private ImageView closeButton;
-    private Context context;
     private LinearLayout linearLayout;
     private ListView filterListView;
     private LinearLayoutManager llm;
@@ -141,7 +138,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private TextView vRating;
     private TextView vStatus;
     private StreetViewPanorama streetPan;
-    private ListView reviewListView;
 
 
     @Override

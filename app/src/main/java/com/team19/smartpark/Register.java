@@ -50,7 +50,6 @@ public class Register extends AppCompatActivity {
         registerSkipButton = findViewById(R.id.loginSkipButton);
 
         fAuth = FirebaseAuth.getInstance();
-        fStore = FirebaseFirestore.getInstance();
         progressBar = findViewById(R.id.progressBar);
 
         //if a user is already login, direct user to map activity

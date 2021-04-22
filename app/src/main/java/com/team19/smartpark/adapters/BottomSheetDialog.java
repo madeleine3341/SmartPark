@@ -21,7 +21,6 @@ public class BottomSheetDialog extends BottomSheetDialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         FirebaseAuth fAuth = FirebaseAuth.getInstance();
-        //FirebaseFirestore fStore = FirebaseFirestore.getInstance();
         View v = inflater.inflate(R.layout.bottom_sheet_layout, container, false);
         Button linkbtn = v.findViewById(R.id.linkBtn);
         linkbtn.setOnClickListener(new View.OnClickListener() {

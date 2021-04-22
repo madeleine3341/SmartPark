@@ -121,17 +121,19 @@ public class LoginActivity extends AppCompatActivity {
                         // get the user input email
                         String mail = resetMail.getText().toString();
                         // using firebase authentication service to send an reset password email to user
-                        fAuth.sendPasswordResetEmail(mail).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(LoginActivity.this, "Reset Link Sent", Toast.LENGTH_SHORT).show();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(LoginActivity.this, "Error ! Reset Link is Not Sent", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                        if(!mail.equals("")) {
+                            fAuth.sendPasswordResetEmail(mail).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Toast.makeText(LoginActivity.this, "Reset Link Sent", Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(LoginActivity.this, "Error ! Reset Link is Not Sent", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
 
                     }
                 });

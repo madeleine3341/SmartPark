@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
         email = findViewById(R.id.profileEmail);
 
         fAuth = FirebaseAuth.getInstance();
-        fStore = FirebaseFirestore.getInstance();
 
         TreeMap<String, String> value = new TreeMap<>();
 
