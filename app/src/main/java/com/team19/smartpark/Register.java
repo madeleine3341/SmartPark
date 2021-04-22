@@ -33,7 +33,6 @@ public class Register extends AppCompatActivity {
     private TextView mLoginBtn;
     private FirebaseAuth fAuth;
     private ProgressBar progressBar;
-    private FirebaseFirestore fStore;
     private String userID;
 
     @Override
@@ -54,11 +53,12 @@ public class Register extends AppCompatActivity {
         fStore = FirebaseFirestore.getInstance();
         progressBar = findViewById(R.id.progressBar);
 
+        //if a user is already login, direct user to map activity
         if (fAuth.getCurrentUser() != null) {
             startActivity(new Intent(getApplicationContext(), MapsActivity.class));
             finish();
         }
-
+        //if a skip button is clicked, direct user to map activity
         registerSkipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,21 +70,23 @@ public class Register extends AppCompatActivity {
         mRegisterBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String email = mEmail.getText().toString().trim();
+                //get all the required info from the user email, password, name and phone number
+                String email = mEmail.getText().toString().trim();
                 String password = mPassword.getText().toString().trim();
-                final String fullName = mFullName.getText().toString();
-                final String phone = mPhone.getText().toString();
+                String fullName = mFullName.getText().toString();
+                String phone = mPhone.getText().toString();
 
+                //if email is empty-->promt an error to user
                 if (TextUtils.isEmpty(email)) {
                     mEmail.setError("Email is Required.");
                     return;
                 }
-
+                //if password is empty-->promt an error to user
                 if (TextUtils.isEmpty(password)) {
                     mPassword.setError("Password is Required.");
                     return;
                 }
-
+                //if password is less than 6 character-->promt an error to user
                 if (password.length() < 6) {
                     mPassword.setError("Password Must be >= 6 Characters");
                     return;
@@ -92,15 +94,12 @@ public class Register extends AppCompatActivity {
 
                 progressBar.setVisibility(View.VISIBLE);
 
-                // register the user in firebase
-
+                // register the user in firebase using the provided email and password
                 fAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-
-                            // send verification link
-
+                            // send verification email to user when sucessfully register
                             FirebaseUser fuser = fAuth.getCurrentUser();
                             fuser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
@@ -113,7 +112,7 @@ public class Register extends AppCompatActivity {
                                     Log.d("Error", "onFailure: Email not sent " + e.getMessage());
                                 }
                             });
-
+                            //store all the user information name, email, phone number and user type to its corresponding ID in firebase and direct user to map activity
                             userID = fAuth.getCurrentUser().getUid();
                             Map<String, Object> user = new HashMap<>();
                             user.put("fName", fullName);
@@ -134,7 +133,7 @@ public class Register extends AppCompatActivity {
             }
         });
 
-
+        //redirect user to login activity when login button is pressed
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

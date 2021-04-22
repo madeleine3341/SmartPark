@@ -19,11 +19,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView fullName, email, phone, verifyMsg;
+    private TextView fullName, email, phone;
     private FirebaseAuth fAuth;
-    private FirebaseFirestore fStore;
-    private String userId;
-    private FirebaseUser user;
 
 
     @Override
@@ -39,12 +36,9 @@ public class MainActivity extends AppCompatActivity {
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
 
-
-        userId = fAuth.getCurrentUser().getUid();
-        user = fAuth.getCurrentUser();
         TreeMap<String, String> value = new TreeMap<>();
 
-
+        //get the current user information from firebase
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid() + "/userInfo");
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -56,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
                     parking.getKey();
                     value.put(parking.getKey(), String.valueOf(parking.getValue()));
                 }
+                //get user phone, full name and email address to show on the textview
                 phone.setText(value.get("phone"));
                 fullName.setText(value.get("fName"));
                 email.setText(value.get("email"));
@@ -71,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void logout(View view) {
+        //using firebase to signout user and redirect user to login activity
         FirebaseAuth.getInstance().signOut();//logout
         startActivity(new Intent(getApplicationContext(), LoginActivity.class));
         finish();

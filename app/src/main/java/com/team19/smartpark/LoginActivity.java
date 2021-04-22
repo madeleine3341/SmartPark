@@ -44,6 +44,8 @@ public class LoginActivity extends AppCompatActivity {
         mCreateBtn = findViewById(R.id.createText);
         forgotTextLink = findViewById(R.id.forgotPassword);
         loginSkipButton = findViewById(R.id.loginSkipButton);
+
+        //redirect user to map activity when skip button is pressed
         loginSkipButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,43 +53,42 @@ public class LoginActivity extends AppCompatActivity {
                 finish();
             }
         });
-
-
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                //get all the information from user input fields
                 String email = mEmail.getText().toString().trim();
                 String password = mPassword.getText().toString().trim();
 
+                //if email is empty --> promt user to re-enter the email address
                 if (TextUtils.isEmpty(email)) {
                     mEmail.setError("Email is Required.");
                     return;
                 }
-
+                //if password is empty --> promt user to re-enter the password
                 if (TextUtils.isEmpty(password)) {
                     mPassword.setError("Password is Required.");
                     return;
                 }
-
+                //if password is less than 6 characters --> promt user to re-enter the email address
                 if (password.length() < 6) {
                     mPassword.setError("Password Must be >= 6 Characters");
                     return;
                 }
 
                 progressBar.setVisibility(View.VISIBLE);
-
-                // authenticate the user
-
+                //get user input value to authenticate with firebase authentication service
                 fAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        //if sucessfully login, promt user to map activity
                         if (task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(getApplicationContext(), MapsActivity.class));
                             finish();
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Error ! " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                        //if failed display a toast notify the user there is an error loggin
+                        else {
+                            Toast.makeText(LoginActivity.this, "Error in Login ! " , Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);
                         }
 
@@ -96,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
 
             }
         });
-
+        //direct user to register activity when create account button is clicked
         mCreateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,42 +109,41 @@ public class LoginActivity extends AppCompatActivity {
         forgotTextLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                //set up UI elements for the dialog
                 final EditText resetMail = new EditText(v.getContext());
-                final AlertDialog.Builder passwordResetDialog = new AlertDialog.Builder(v.getContext());
-                passwordResetDialog.setTitle("Reset Password ?");
-                passwordResetDialog.setMessage("Enter Your Email To Received Reset Link.");
-                passwordResetDialog.setView(resetMail);
-
-                passwordResetDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                final AlertDialog.Builder ResetDialog = new AlertDialog.Builder(v.getContext());
+                ResetDialog.setTitle("Reset Password ");
+                ResetDialog.setMessage("Enter Your Email To Receive Reset Link");
+                ResetDialog.setView(resetMail);
+                ResetDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // extract the email and send reset link
+                        // get the user input email
                         String mail = resetMail.getText().toString();
+                        // using firebase authentication service to send an reset password email to user
                         fAuth.sendPasswordResetEmail(mail).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                Toast.makeText(LoginActivity.this, "Reset Link Sent To Your Email.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, "Reset Link Sent", Toast.LENGTH_SHORT).show();
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(LoginActivity.this, "Error ! Reset Link is Not Sent" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(LoginActivity.this, "Error ! Reset Link is Not Sent", Toast.LENGTH_SHORT).show();
                             }
                         });
 
                     }
                 });
 
-                passwordResetDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                ResetDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // close the dialog
                     }
                 });
-
-                passwordResetDialog.create().show();
-
+                //show the dialog
+                ResetDialog.create().show();
             }
         });
 

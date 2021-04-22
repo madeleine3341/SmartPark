@@ -163,6 +163,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fab.setVisibility(View.GONE);
         myLocationButton = findViewById(R.id.myLocationButton);
         userButton = findViewById(R.id.userButton);
+        //if there is an account logged in, transfer to profile activity(main activity) if not, direct user to register activity
         userButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -177,10 +178,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (fAuth.getCurrentUser() != null) {
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference ref = database.getReference(fAuth.getCurrentUser().getUid() + "/userInfo/type");
+            //get the type of the user to decide weather to show the management button
             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
+                        //if type is B --> operator type --> show the management button
                         if (dataSnapshot.getValue().equals("B")) {
                             fab.setVisibility(View.VISIBLE);
                         } else {
@@ -197,6 +200,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             fab.setVisibility(View.GONE);
         }
+        //get the current location of the user and update the camera view
         myLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -241,6 +245,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 nearbyButton.setVisibility(View.GONE);
             }
         });
+        //set up UI elements when searchview is closed.
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
@@ -254,20 +259,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public boolean onQueryTextSubmit(String query) {
                 String location = searchView.getQuery().toString();
                 List<Address> addressList = null;
+                //if location entered is not empty
                 if (location != null || !location.equals("")) {
                     Geocoder geocoder = new Geocoder(MapsActivity.this);
+                    //get the equivalence location of the input address from google map
                     try {
                         addressList = geocoder.getFromLocationName(location, 1);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     Address address = null;
+                    //if the address from google map is valid --> store it into new address object
                     try {
                         address = addressList.get(0);
 
                     } catch (IndexOutOfBoundsException ignore) {
 
                     }
+                    //if address is not empty, update the UI elements and google map camera
                     if (address != null) {
                         nearbyButton.setVisibility(View.VISIBLE);
                         LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
@@ -486,12 +495,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setMarkers() {
+        //set up connection with firebase database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ref = database.getReference();
         ref.addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //when there is a change in data in firebase,get and store all the parking lots from firebase to a list
                 Iterable<DataSnapshot> parkingList = dataSnapshot.getChildren();
                 for (DataSnapshot keyNode : parkingList) {
                     Iterable<DataSnapshot> e = keyNode.getChildren();
@@ -499,12 +510,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (parkingList12.getKey().equals("parkingLots")) {
                             Iterable<DataSnapshot> e2 = parkingList12.getChildren();
                             for (DataSnapshot listofParking : e2) {
-                                Log.i("Bug: ", String.valueOf(listofParking.getValue()));
                                 parkingsList.put(String.valueOf(listofParking.getKey()), listofParking.getValue(Parking.class));
                             }
                         }
                     }
                 }
+                //iterate through the parking lots to get all the nescessary information
                 for (Map.Entry<String, Parking> parkingSet :
                         parkingsList.entrySet()) {
                     Parking parking = parkingSet.getValue();
@@ -512,6 +523,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     int available = 0;
                     String parkingId = null;
                     Marker previousMarker = null;
+                    //only get info when there are info of the parking lot
                     if (parking.spots != null && (parking.name != null || parking.name != "") && (parking.address != null || parking.address != "")) {
                         count = parking.spots.size();
                         available = Collections.frequency(parking.spots.values(), true);
@@ -664,6 +676,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void filterUISetup() {
+
+        //set up all the buttons, spinner and layout for the filter
         horizontalScrollView = findViewById(R.id.scrollViewFilter);
         linearLayout = findViewById(R.id.bottomSheet);
         filterListView = findViewById(R.id.filterListView);
@@ -676,10 +690,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         openButton = findViewById(R.id.openButton);
         sFeesButton = findViewById(R.id.sortFeesButton);
         updateFilterUI(false);
+
+        // Set up the adpater for the filter by radius spinner
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.string, R.layout.spinner_custom_drop_down_menu);
         adapter.setDropDownViewResource(R.layout.spinner_custom_drop_down_menu);
         sDistanceButton.setAdapter(adapter);
         sDistanceButton.setOnItemSelectedListener(this);
+
+        // Update the UI elements of the filter options
         sASButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -698,6 +716,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
+        // Update the UI elements of the filter options
         openButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -716,6 +735,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
+        // Update the UI elements of the filter options
         sFeesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -734,12 +754,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
+        //when filter button is clicked, update the UI elements
         nearbyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateFilterUI(true);
             }
         });
+        //when clear button is clicked (x) remove all the filter option and the circular view if shown on the map, update the UI
         clearButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -754,6 +776,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    //get the position of the radius filter, call the filter algortihm, set the UI elements of the filter
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         spinnerPosition = position;
@@ -781,7 +804,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    //update the UI elements of the filter
     private void updateFilterUI(Boolean state) {
+        //if state = true --> hide filterButton, show the all the filter option
         if (state) {
             nearbyButton.setVisibility(View.GONE);
             horizontalScrollView.setVisibility(View.VISIBLE);
@@ -789,7 +814,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             textView.setVisibility(View.VISIBLE);
             linearLayout.setVisibility(View.VISIBLE);
 
-        } else {
+        }
+        //if state = false --> hide all the filter option, show the nearby button and reset the state of the toggle switches
+        else {
             mbottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             nearbyButton.setVisibility(View.VISIBLE);
             horizontalScrollView.setVisibility(View.GONE);
@@ -815,6 +842,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String currentTime = simpleDateFormat.format(calendar.getTime());
         float currentHour = Float.valueOf(currentTime.substring(0, currentTime.indexOf(":"))) + Float.valueOf(currentTime.substring(currentTime.indexOf(":") + 1)) / 60;
         int radius;
+        //get the filter radius value based on user selected input (100-500m with 100m step)
         switch (spinnerPosition) {
             case 1:
                 radius = 100;
@@ -832,6 +860,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 radius = 500;
                 break;
             default:
+                //default radius when distance is not selected (only other criteria are selected)
                 if (sASButton.isChecked() || openButton.isChecked() || sFeesButton.isChecked()) {
                     radius = 2000;
                 } else {
@@ -843,12 +872,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ArrayList<Parking> filter = new ArrayList<Parking>();
         //Create an ArrayList of String to store distance information
         ArrayList<String> distance = new ArrayList<String>();
+        //Store the parking lot that is in the specified radius
         for (Map.Entry<String, Parking> parkingSet : parkingsList.entrySet()) {
             Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, parkingSet.getValue().lat, parkingSet.getValue().lng, result1);
             if (result1[0] < radius) {
                 filter.add(parkingSet.getValue());
             }
         }
+        //Create circular view on map depends on user selected radius
         if (myCircle != null) {
             myCircle.remove();
             myCircle = null;
@@ -871,6 +902,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 double fee2 = 0;
                 float operatingHour1 = 0;
                 float operatingHour2 = 0;
+                // When available spot button is checked --> calculate the scoring for the i and j elements in the array of parking lot
                 if (sASButton.isChecked()) {
                     spot1 = Collections.frequency(filter.get(i).spots.values(), true) / filter.get(i).spots.size();
                     spot2 = Collections.frequency(filter.get(j).spots.values(), true) / filter.get(j).spots.size();
@@ -878,10 +910,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     spot1 = 0;
                     spot2 = 0;
                 }
+                // When fees button is checked --> calculate the scoring for the i and j elements in the array of parking lot
                 if (sFeesButton.isChecked()) {
                     fee1 = filter.get(i).fees;
                     fee2 = filter.get(j).fees;
                 }
+                // When operating hour button is checked --> calculate the scoring for the i and j elements in the array of parking lot
                 if (openButton.isChecked()) {
                     String a = filter.get(i).operatingHour;
                     String b = filter.get(j).operatingHour;
@@ -892,6 +926,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Log.i("Spot1 Hour: ", String.valueOf(operatingHour1));
                     Log.i("Spot2 Hour: ", String.valueOf(operatingHour2));
                 }
+                // When radius button is selected --> calculate the scoring for the i and j elements in the array of parking lot
                 if (spinnerPosition > 0) {
                     Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(i).lat, filter.get(i).lng, result1);
                     Location.distanceBetween(cameraLatLng.latitude, cameraLatLng.longitude, filter.get(j).lat, filter.get(j).lng, result2);
@@ -899,8 +934,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     result1[0] = 0;
                     result2[0] = 0;
                 }
+                // Calculate the overall score for each parking lot i and j (decision matrix)
                 float score1 = (float) (0.7 * (result1[0] / 2000) + 0.1 * spot1 + 0.1 * (1 - operatingHour1) + 0.1 * (fee1));
                 float score2 = (float) (0.7 * (result2[0] / 2000) + 0.1 * spot2 + 0.1 * (1 - operatingHour2) + 0.1 * (fee2));
+                //Swap the highest score to the first element in the array and the lowest to the bottom of the array
                 if (score1 > score2) {
                     Collections.swap(filter, j, i);
                 }
@@ -915,10 +952,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         filterListAdapter adapter = new filterListAdapter(this, R.layout.adapter_bottom_sheet_list_view, filter, distance);
         filterListView.setAdapter(adapter);
     }
-
-    public void updateview(LatLng latLng) {
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 20));
-    }
-
 }
 
