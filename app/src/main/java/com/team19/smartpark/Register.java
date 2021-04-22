@@ -75,19 +75,19 @@ public class Register extends AppCompatActivity {
                 String fullName = mFullName.getText().toString();
                 String phone = mPhone.getText().toString();
 
-                //if email is empty-->promt an error to user
+                //if email is empty-->prompt an error to user
                 if (TextUtils.isEmpty(email)) {
                     mEmail.setError("Email is Required.");
                     return;
                 }
-                //if password is empty-->promt an error to user
-                if (TextUtils.isEmpty(password)) {
-                    mPassword.setError("Password is Required.");
-                    return;
-                }
-                //if password is less than 6 character-->promt an error to user
+                //if password is less than 6 character-->prompt an error to user
                 if (password.length() < 6) {
                     mPassword.setError("Password Must be >= 6 Characters");
+                    return;
+                }
+                //if password is empty-->prompt an error to user
+                if (TextUtils.isEmpty(password)) {
+                    mPassword.setError("Password is Required.");
                     return;
                 }
 
