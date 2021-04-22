@@ -2,7 +2,6 @@ package com.team19.smartpark;
 
 
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -23,7 +22,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -69,7 +67,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.team19.smartpark.adapters.filterListAdapter;
 import com.team19.smartpark.models.GoogleMapsBottomSheetBehaviour;
 import com.team19.smartpark.models.Parking;
@@ -483,6 +480,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
     }
+
     //function when a streetview is created. This streetview is then assigned to the one found on the marker bottom sheet.
     @Override
     public void onStreetViewPanoramaReady(StreetViewPanorama streetViewPanorama) {

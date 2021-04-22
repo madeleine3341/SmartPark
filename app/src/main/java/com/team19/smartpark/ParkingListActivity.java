@@ -22,7 +22,6 @@ import com.team19.smartpark.models.Parking;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.TreeMap;
 
 public class ParkingListActivity extends AppCompatActivity {

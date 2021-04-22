@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,12 +31,12 @@ import java.util.TreeMap;
 
 public class ParkingSpotAdapter extends RecyclerView.Adapter<ParkingSpotAdapter.ViewHolder> {
     static ArrayList<Map.Entry<String, Boolean>> spots;
+    private final FirebaseAuth fAuth;
+    private final Boolean flag;
     LayoutInflater inflater;
     FragmentManager fragmentManager;
     Context context;
     Boolean deleteMode;
-    private final FirebaseAuth fAuth;
-    private final Boolean flag;
 
     public ParkingSpotAdapter(Context ctx, TreeMap<String, Boolean> spots, FragmentManager fragmentManager, Boolean deleteMode) {
         // bind the adapter fields to the constructor parameters

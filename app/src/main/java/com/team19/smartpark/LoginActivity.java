@@ -87,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         //if failed display a toast notify the user there is an error loggin
                         else {
-                            Toast.makeText(LoginActivity.this, "Error in Login ! " , Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Error in Login ! ", Toast.LENGTH_SHORT).show();
                             progressBar.setVisibility(View.GONE);
                         }
 
@@ -120,7 +120,7 @@ public class LoginActivity extends AppCompatActivity {
                         // get the user input email
                         String mail = resetMail.getText().toString();
                         // using firebase authentication service to send an reset password email to user
-                        if(!mail.equals("")) {
+                        if (!mail.equals("")) {
                             fAuth.sendPasswordResetEmail(mail).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {

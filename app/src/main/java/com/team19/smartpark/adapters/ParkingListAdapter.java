@@ -36,6 +36,7 @@ public class ParkingListAdapter extends RecyclerView.Adapter<ParkingListAdapter.
         this.inflater = LayoutInflater.from(ctx);
         this.ctx = ctx;
     }
+
     // extract parking name, spots, id from node of parkings
     public void SetArrays(TreeMap<String, Parking> Keyparking) {
         for (Map.Entry<String, Parking> parking : Keyparking.entrySet()) {
