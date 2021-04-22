@@ -82,21 +82,15 @@ public class filterListAdapter extends ArrayAdapter<String> {
         TextView operatingHours = convertView.findViewById(R.id.OperatingHours);
         showspotslist = convertView.findViewById(R.id.availableSpotsList);
 
-
-//        if (parkingInfo.size() > 0 && Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
-//            name.setText(parkingInfo.get(position).name);
-//            address.setText(parkingInfo.get(position).address);
-//            fees.setText("Fees: " + parkingInfo.get(position).fees + "$/hr");
-//            operatingHours.setText("Operating Hours: " + parkingInfo.get(position).getOperatingHour());
-//            distance.setText("Distance to your destination: "+fdistance.get(position) + " m");
-//        }
-
         showspotslist.setOnClickListener(new View.OnClickListener() {
             //fragementlist
             @Override
             public void onClick(View v) {
                 SPOTS.clear();
                 SPOTS.add("Avaliable Spots:");
+                // add list of aval. spots
+                //set in a bundle
+                //send it available spots fragment
                 if (parkingInfo.size() > 0 && Collections.frequency(parkingInfo.get(position).spots.values(), true) > 0) {
                     SPOTS.add(avSpots.get(position).replace("Id", ""));
                     bundle.putStringArrayList(fcontext.getString(R.string.AVspots), SPOTS);

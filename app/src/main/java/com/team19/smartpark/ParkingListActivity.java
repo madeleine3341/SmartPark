@@ -26,9 +26,8 @@ import java.util.List;
 import java.util.TreeMap;
 
 public class ParkingListActivity extends AppCompatActivity {
-    List<String> parkings = null;
     ParkingListAdapter adapter;
-    LinearLayoutManager ly;
+    LinearLayoutManager Linear;
     private FirebaseAuth fAuth;
     private RecyclerView plist;
     private FloatingActionButton addParkingFAB;
@@ -38,6 +37,7 @@ public class ParkingListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_parking_list);
+
         addParkingFAB = findViewById(R.id.addParkingfab);
         addParkingFAB.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,15 +46,14 @@ public class ParkingListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-
+        //listview of parkinglist=plist
         plist = findViewById(R.id.Parking_RecyclerView);
         fAuth = FirebaseAuth.getInstance();
-
-        ly = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        //list is vertical
+        Linear = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        //divider
         plist.addItemDecoration(new DividerItemDecoration(plist.getContext(), DividerItemDecoration.VERTICAL));
-
-        plist.setLayoutManager(ly);
+        plist.setLayoutManager(Linear);
 
         readParkings();
 
@@ -70,11 +69,13 @@ public class ParkingListActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 ArrayList<HashMap<String, Boolean>> spots = new ArrayList<>();
                 TreeMap<String, Parking> keyParking = new TreeMap<>();
-                //datasnap stores key and value of a node
                 Iterable<DataSnapshot> infos = dataSnapshot.getChildren();
+
+                //get node and the parking object
                 for (DataSnapshot keyNode : infos) {
                     keyParking.put(keyNode.getKey(), keyNode.getValue(Parking.class));
                 }
+                //setup in adapter
                 loadlist(keyParking);
             }
 
@@ -91,8 +92,4 @@ public class ParkingListActivity extends AppCompatActivity {
         plist.setAdapter(adapter);
     }
 
-    private void goToParkingSpotsActivity() {
-        //Intent intent = new Intent(this, ParkingSpotsActivity.class);
-        //startActivity(intent);
-    }
 }

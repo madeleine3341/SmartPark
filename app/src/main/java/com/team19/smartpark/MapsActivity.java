@@ -313,26 +313,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-//        behavior.setBottomSheetCallback(new GoogleMapsBottomSheetBehaviour.BottomSheetCallback() {
-//            @Override
-//            public void onStateChanged(@NonNull View bottomSheet, @GoogleMapsBottomSheetBehaviour.State int newState) {
-//                // each time the bottomsheet changes position, animate the camera to keep the pin in view
-//                // normally this would be a little more complex (getting the pin location and such),
-//                // but for the purpose of an example this is enough to show how to stay centered on a pin
-//                mMap.animateCamera(com.google.android.gms.maps.CameraUpdateFactory.newLatLng(clickedMarkerCoordinates));
-//            }
-//
-//            @Override
-//            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-//
-//            }
-//        });
-
     }
 
 
     //send to google map show directions
     public void DisplayTrack(String destination) {
+        // get devic coordinates
         getDeviceLocation();
         Double la = lastKnownLocation.getLatitude();
         Double lo = lastKnownLocation.getLongitude();
@@ -345,7 +331,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
 
-
+            // if google map not downloaded direct to app store
         } catch (ActivityNotFoundException e) {
             Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.android.apps.maps");
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);

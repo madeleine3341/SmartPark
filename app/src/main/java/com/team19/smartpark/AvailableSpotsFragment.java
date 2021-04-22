@@ -34,8 +34,9 @@ public class AvailableSpotsFragment extends DialogFragment {
                 dismiss();
             }
         });
-
+        // get aval. spots from bundle
         ArrayList<String> spots = getArguments().getStringArrayList(getActivity().getString(R.string.AVspots));
+        //set adapter
         ArrayAdapter<String> itemsAdapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_list_item_1, spots);
         spotsList.setAdapter(itemsAdapter);
 
